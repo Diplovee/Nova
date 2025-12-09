@@ -49,6 +49,7 @@ interface ShapeLayerProps {
   addSubtask: (shapeId: string) => void;
 
   // Helpers
+  setSelectedIds: (ids: Set<string>) => void;
   playAudio: (url: string) => void;
   autoSizeShape: (shape: Shape) => Shape;
   generateId: () => string;
@@ -104,11 +105,27 @@ export const ShapeLayer: React.FC<ShapeLayerProps> = ({
   onExpandSubtasks,
   onCollapseSubtasks,
   addSubtask,
+  setSelectedIds,
   playAudio,
   autoSizeShape,
   generateId
 }) => {
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
+  const [contextMenu, setContextMenu] = React.useState<{shapeId: string, x: number, y: number} | null>(null);
+
+  // Close context menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      // Don't close if clicking on the menu itself
+      const target = e.target as HTMLElement;
+      if (target.closest('[data-context-menu]')) return;
+      setContextMenu(null);
+    };
+    if (contextMenu) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }
+  }, [contextMenu]);
 
   // Auto Resize Textarea
   useEffect(() => {
@@ -209,6 +226,19 @@ export const ShapeLayer: React.FC<ShapeLayerProps> = ({
               onMouseEnter={() => onMouseEnter(shape.id)}
               onMouseLeave={onMouseLeave}
               onDoubleClick={(e) => onShapeDoubleClick(e, shape)}
+              onContextMenu={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                if (!shape.locked) {
+                  // Select this shape (deselecting any others)
+                  setSelectedIds(new Set([shape.id]));
+                  setContextMenu({
+                    shapeId: shape.id,
+                    x: e.clientX,
+                    y: e.clientY
+                  });
+                }
+              }}
             >
 
 
@@ -452,6 +482,108 @@ export const ShapeLayer: React.FC<ShapeLayerProps> = ({
             </div>
           );
       })}
+
+      {/* Right-click Context Menu */}
+      {contextMenu && (
+        <div
+          className="absolute z-[1000] bg-nova-card border border-slate-700/50 rounded-lg shadow-xl p-3 flex flex-col gap-2 animate-in fade-in zoom-in-95 duration-200 max-w-[240px]"
+          style={{
+            left: contextMenu.x,
+            top: contextMenu.y,
+            transform: 'translate(-50%, -100%) translateY(-8px)'
+          }}
+          onMouseDown={(e) => e.stopPropagation()} // Prevent closing when clicking menu
+        >
+          {(() => {
+            const menuShape = shapes.find(s => s.id === contextMenu.shapeId);
+            if (!menuShape) return null;
+
+            return (
+              <>
+                {/* Quick Actions */}
+                <div className="grid grid-cols-3 gap-1">
+                  {duplicateShape && (
+                    <button
+                      onClick={() => { duplicateShape(); setContextMenu(null); }}
+                      className="flex-shrink-0 p-2 bg-slate-800/50 hover:bg-slate-700 rounded text-xs text-center transition-colors"
+                      title="Duplicate"
+                    >
+                      <Copy size={14} className="mx-auto mb-1 text-slate-400" />
+                      <span className="text-[10px] text-slate-400">Copy</span>
+                    </button>
+                  )}
+                  {bringToFront && (
+                    <button
+                      onClick={() => { bringToFront(); setContextMenu(null); }}
+                      className="flex-shrink-0 p-2 bg-slate-800/50 hover:bg-slate-700 rounded text-xs text-center transition-colors"
+                      title="Bring to Front"
+                    >
+                      <Layers size={14} className="mx-auto mb-1 text-slate-400" />
+                      <span className="text-[10px] text-slate-400">Front</span>
+                    </button>
+                  )}
+                  {sendToBack && (
+                    <button
+                      onClick={() => { sendToBack(); setContextMenu(null); }}
+                      className="flex-shrink-0 p-2 bg-slate-800/50 hover:bg-slate-700 rounded text-xs text-center transition-colors"
+                      title="Send to Back"
+                    >
+                      <Layers size={14} className="mx-auto mb-1 text-slate-400 opacity-50" />
+                      <span className="text-[10px] text-slate-400">Back</span>
+                    </button>
+                  )}
+                  {toggleLock && (
+                    <button
+                      onClick={() => { toggleLock(); setContextMenu(null); }}
+                      className={`flex-shrink-0 p-2 bg-slate-800/50 hover:bg-slate-700 rounded text-xs text-center transition-colors ${menuShape.locked ? 'bg-red-500/10' : ''}`}
+                      title={menuShape.locked ? "Unlock" : "Lock"}
+                    >
+                      {menuShape.locked ? <Lock size={14} className="mx-auto mb-1 text-red-400" /> : <Unlock size={14} className="mx-auto mb-1 text-slate-400" />}
+                      <span className="text-[10px] text-slate-400">{menuShape.locked ? 'Unlock' : 'Lock'}</span>
+                    </button>
+                  )}
+                  {selectedIds.size > 1 && onGroup && (
+                    <button
+                      onClick={() => { onGroup(); setContextMenu(null); }}
+                      className="flex-shrink-0 p-2 bg-slate-800/50 hover:bg-slate-700 rounded text-xs text-center transition-colors"
+                      title="Group Shapes"
+                    >
+                      <Group size={14} className="mx-auto mb-1 text-slate-400" />
+                      <span className="text-[10px] text-slate-400">Group</span>
+                    </button>
+                  )}
+                  {menuShape.groupId && selectedIds.size === 1 && onUngroup && (
+                    <button
+                      onClick={() => { onUngroup(); setContextMenu(null); }}
+                      className="flex-shrink-0 p-2 bg-slate-800/50 hover:bg-slate-700 rounded text-xs text-center transition-colors"
+                      title="Ungroup Shapes"
+                    >
+                      <Ungroup size={14} className="mx-auto mb-1 text-slate-400" />
+                      <span className="text-[10px] text-slate-400">Ungroup</span>
+                    </button>
+                  )}
+                </div>
+
+                {/* Quick AI Actions */}
+                {setShowAiModal && (
+                  <>
+                    <div className="h-px bg-slate-700/50 w-full" />
+                    <div className="grid grid-cols-2 gap-1">
+                      <button
+                        onClick={() => { setShowAiModal(true); setContextMenu(null); }}
+                        className="flex-shrink-0 p-2 bg-slate-800/50 hover:bg-nova-primary/20 hover:border-nova-primary/30 border border-transparent rounded text-xs text-center transition-colors"
+                      >
+                        <Sparkles size={12} className="mx-auto mb-1 text-slate-400 group-hover:text-nova-primary" />
+                        <span className="text-[9px] text-slate-400 group-hover:text-nova-primary">AI Actions</span>
+                      </button>
+                    </div>
+                  </>
+                )}
+              </>
+            );
+          })()}
+        </div>
+      )}
     </>
   );
 };

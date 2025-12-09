@@ -1107,6 +1107,7 @@ export const NovaBoard: React.FC<NovaBoardProps> = ({
             onExpandSubtasks={handleExpandSubtasks}
             onCollapseSubtasks={handleCollapseSubtasks}
             addSubtask={addSubtask}
+            setSelectedIds={setSelectedIds}
             onOpenImageModal={setImageModalAttachment}
         />
 
