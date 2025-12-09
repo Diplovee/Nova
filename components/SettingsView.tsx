@@ -135,7 +135,7 @@ export const SettingsView: React.FC = () => {
                                 Combining the flexibility of an infinite canvas with structured task management.
                             </p>
                             <p className="flex items-center justify-center gap-2">
-                                <Sparkles size={16} className="text-nova-primary"/> Powered by <span className="text-white font-semibold">Xalo Software</span> & Google Gemini AI.
+                                 Powered by <span className="text-white font-semibold">Xalo Software</span>
                             </p>
                         </div>
 
