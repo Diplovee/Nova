@@ -29,7 +29,8 @@ interface ShapeLayerProps {
   setIsEditing: (is: boolean) => void;
   setEditingId: (id: string | null) => void;
   onOpenEditor: (shape: Shape) => void;
-  
+  onOpenImageModal: (attachment: Attachment) => void;
+
   // Actions
   setShowAiModal: (show: boolean) => void;
   triggerFileUpload: () => void;
@@ -86,6 +87,7 @@ export const ShapeLayer: React.FC<ShapeLayerProps> = ({
   setIsEditing,
   setEditingId,
   onOpenEditor,
+  onOpenImageModal,
   setShowAiModal,
   triggerFileUpload,
   triggerRecording,
@@ -391,6 +393,39 @@ export const ShapeLayer: React.FC<ShapeLayerProps> = ({
                                 </div>
                             )}
                             
+                            {/* Attachment Chips */}
+                            {hasAttachments && !isImageShape && !isVoice && (
+                                <div className="mt-2 flex flex-wrap gap-2">
+                                    {shape.attachments!.map((attachment, idx) => (
+                                        <div key={attachment.id} className="bg-slate-800/50 border border-slate-700/50 rounded-lg p-2 flex items-center gap-2 text-xs">
+                                            {attachment.type === 'image' ? (
+                                                <button
+                                                    className="relative cursor-pointer hover:scale-105 transition-transform"
+                                                    onClick={(e) => { e.stopPropagation(); onOpenImageModal(attachment); }}
+                                                >
+                                                    <img
+                                                        src={attachment.url}
+                                                        alt={attachment.name}
+                                                        className="w-8 h-8 rounded object-cover border border-slate-600 hover:border-nova-primary transition-colors"
+                                                    />
+                                                    <ImageIcon size={12} className="absolute -bottom-1 -right-1 bg-slate-800 rounded-full p-0.5 text-slate-400" />
+                                                </button>
+                                            ) : attachment.type === 'audio' ? (
+                                                <>
+                                                    <Mic size={14} className="text-red-400" />
+                                                    <span className="text-slate-300 truncate max-w-24">{attachment.name}</span>
+                                                </>
+                                            ) : (
+                                                <>
+                                                    {attachment.type === 'video' ? <FileText size={14} className="text-blue-400" /> : <FileText size={14} className="text-slate-400" />}
+                                                    <span className="text-slate-300 truncate max-w-24">{attachment.name}</span>
+                                                </>
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+
                             {/* Expanded Indicator */}
                             {shape.expandedNodeIds && (
                                 <div className="mt-2 p-2 bg-nova-primary/10 border border-nova-primary/20 rounded-lg flex items-center gap-2 text-xs text-nova-primary">

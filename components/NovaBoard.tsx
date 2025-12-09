@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Shape, ShapeType, Point, ToolType, Side, Connection, Subtask, Attachment, ConnectionStyle, ShapeStyling } from '../types';
+import { XCircle } from 'lucide-react';
 import { generateSubtasks, refineText, generateProjectNote, generateSheetData } from '../services/geminiService';
 import { getNearestSide, autoSizeShape } from '../utils/boardUtils';
 import { Mic } from 'lucide-react';
@@ -55,6 +56,9 @@ export const NovaBoard: React.FC<NovaBoardProps> = ({
   const [editingId, setEditingId] = useState<string | null>(null);
   const [loadingIds, setLoadingIds] = useState<Set<string>>(new Set());
   const [showAiModal, setShowAiModal] = useState(false);
+
+  // --- Image Modal ---
+  const [imageModalAttachment, setImageModalAttachment] = useState<Attachment | null>(null);
   
   // --- Connector State ---
   const [connectionDraft, setConnectionDraft] = useState<{ sourceId: string, sourceSide?: Side } | null>(null);
@@ -1085,6 +1089,7 @@ export const NovaBoard: React.FC<NovaBoardProps> = ({
             onUngroup={handleUngroup}
             onExpandSubtasks={handleExpandSubtasks}
             onCollapseSubtasks={handleCollapseSubtasks}
+            onOpenImageModal={setImageModalAttachment}
         />
 
         {selectionBox && (
@@ -1141,6 +1146,32 @@ export const NovaBoard: React.FC<NovaBoardProps> = ({
         setActiveTool={setActiveTool}
         activeTool={activeTool}
       />
+
+      {/* Image Preview Modal */}
+      {imageModalAttachment && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[1000] flex items-center justify-center p-4 animate-in fade-in duration-200" onClick={() => setImageModalAttachment(null)}>
+          <div className="relative max-w-4xl max-h-full bg-nova-card rounded-2xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300" onClick={(e) => e.stopPropagation()}>
+            <div className="absolute top-4 right-4 z-10">
+              <button
+                onClick={() => setImageModalAttachment(null)}
+                className="w-10 h-10 rounded-full bg-black/50 hover:bg-black/70 text-white flex items-center justify-center transition-colors"
+              >
+                <XCircle size={24} />
+              </button>
+            </div>
+            <div className="p-6">
+              <img
+                src={imageModalAttachment.url}
+                alt={imageModalAttachment.name}
+                className="max-w-full max-h-[70vh] object-contain rounded-lg"
+              />
+              <div className="mt-4 text-center">
+                <h3 className="text-lg font-semibold text-white">{imageModalAttachment.name}</h3>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
