@@ -1,7 +1,7 @@
 import React, { useState, useRef, useCallback } from 'react';
 import { ToolButton } from './ui/ToolButton';
 import { ShapeType, Shape, ShapeStyling } from '../types';
-import { Maximize2, Minimize2, Scan, Crosshair, ZoomIn, ZoomOut, Palette, Square, SquareDashed, CircleDashed, FileText, Table, Database } from 'lucide-react';
+import { Maximize2, Minimize2, Scan, Crosshair, ZoomIn, ZoomOut, Palette, Square, SquareDashed, CircleDashed, FileText, Table, Database, Copy, Lock, Unlock, Layers, Group, Ungroup, Network, Shrink, ImageIcon, Mic, Sparkles, Plus, MoreVertical, Lightbulb, Zap } from 'lucide-react';
 
 interface ColorPickerProps {
   color: string;
@@ -215,9 +215,22 @@ interface RightPanelProps {
   updateStyling: (styling: Partial<ShapeStyling>) => void;
   setActiveTool: (tool: string) => void;
   activeTool: string;
+  // Action handlers
+  duplicateShape?: () => void;
+  bringToFront?: () => void;
+  sendToBack?: () => void;
+  toggleLock?: () => void;
+  onGroup?: () => void;
+  onUngroup?: () => void;
+  onExpandSubtasks?: (shapeId: string) => void;
+  onCollapseSubtasks?: (shapeId: string) => void;
+  setShowAiModal?: (show: boolean) => void;
+  triggerFileUpload?: () => void;
+  addSubtask?: (shapeId: string) => void;
+  handleAIBrainstorm?: (mode: 'subtasks' | 'nodes' | 'refine' | 'custom' | 'note' | 'sheet', customPrompt?: string) => void;
 }
 
-type TabType = 'view' | 'tools' | 'properties';
+type TabType = 'view' | 'tools' | 'properties' | 'actions';
 
 export const RightPanel: React.FC<RightPanelProps> = ({
   scale,
@@ -229,7 +242,20 @@ export const RightPanel: React.FC<RightPanelProps> = ({
   shapes,
   updateStyling,
   setActiveTool,
-  activeTool
+  activeTool,
+  // Action handlers
+  duplicateShape,
+  bringToFront,
+  sendToBack,
+  toggleLock,
+  onGroup,
+  onUngroup,
+  onExpandSubtasks,
+  onCollapseSubtasks,
+  setShowAiModal,
+  triggerFileUpload,
+  addSubtask,
+  handleAIBrainstorm
 }) => {
   const [activeTab, setActiveTab] = useState<TabType>('view');
   const [showColorPicker, setShowColorPicker] = useState<'fill' | 'border' | null>(null);
@@ -240,13 +266,14 @@ export const RightPanel: React.FC<RightPanelProps> = ({
   const tabs = [
     { id: 'view', label: 'View', icon: Scan },
     { id: 'tools', label: 'Tools', icon: FileText },
-    { id: 'properties', label: 'Properties', icon: Palette }
+    { id: 'properties', label: 'Prop', icon: Palette },
+    { id: 'actions', label: 'Actions', icon: Zap }
   ] as const;
 
   return (
     <div className="fixed right-0 top-0 bottom-0 bg-nova-card/90 backdrop-blur-md border-l border-slate-700/50 p-4 z-[101] w-64 overflow-y-auto">
       {/* Tab Navigation */}
-      <div className="flex justify-center space-x-2 mb-4">
+      <div className="flex justify-center space-x-1 mb-3">
         {tabs.map((tab) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.id;
@@ -254,13 +281,13 @@ export const RightPanel: React.FC<RightPanelProps> = ({
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id as TabType)}
-              className={`px-4 py-2 rounded-lg text-xs font-medium transition-all flex flex-col items-center gap-1 ${
+              className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all flex flex-col items-center gap-0.5 ${
                 isActive
                   ? 'bg-nova-primary text-white shadow-lg'
                   : 'bg-slate-800/50 text-slate-400 hover:text-slate-300 hover:bg-slate-700/50'
               }`}
             >
-              <Icon size={16} />
+              <Icon size={14} />
               {tab.label}
             </button>
           );
@@ -423,6 +450,158 @@ export const RightPanel: React.FC<RightPanelProps> = ({
             <div className="text-center text-slate-400 py-8">
               <Palette size={32} className="mx-auto mb-2 opacity-50" />
               <p className="text-sm">Select a shape to edit its properties</p>
+            </div>
+          )
+        )}
+
+        {/* Actions Tab */}
+        {activeTab === 'actions' && (
+          selectedShape ? (
+            <div>
+              <h3 className="text-white font-bold mb-3 flex items-center gap-2"><Zap size={16}/> Actions</h3>
+
+              {/* Quick Actions */}
+              <div className="grid grid-cols-3 gap-1 mb-4">
+              {duplicateShape && (
+                <button
+                  onClick={duplicateShape}
+                  className="flex-shrink-0 p-2 bg-slate-800/50 hover:bg-slate-700 rounded text-xs text-center transition-colors group"
+                  title="Duplicate"
+                >
+                  <Copy size={14} className="mx-auto mb-1 text-slate-400 group-hover:text-white" />
+                  <span className="text-[10px] text-slate-400 group-hover:text-white">Copy</span>
+                </button>
+              )}
+              {selectedShape?.locked !== undefined && toggleLock && (
+                <button
+                  onClick={toggleLock}
+                  className={`flex-shrink-0 p-2 bg-slate-800/50 hover:bg-slate-700 rounded text-xs text-center transition-colors group ${selectedShape.locked ? 'bg-red-500/10' : ''}`}
+                  title={selectedShape.locked ? "Unlock" : "Lock"}
+                >
+                  {selectedShape.locked ? <Lock size={14} className="mx-auto mb-1 text-red-400 group-hover:text-red-300" /> : <Unlock size={14} className="mx-auto mb-1 text-slate-400 group-hover:text-white" />}
+                  <span className="text-[10px] text-slate-400 group-hover:text-white">{selectedShape.locked ? 'Unlock' : 'Lock'}</span>
+                </button>
+              )}
+              {bringToFront && (
+                <button
+                  onClick={bringToFront}
+                  className="flex-shrink-0 p-2 bg-slate-800/50 hover:bg-slate-700 rounded text-xs text-center transition-colors group"
+                  title="Bring to Front"
+                >
+                  <Layers size={14} className="mx-auto mb-1 text-slate-400 group-hover:text-white" />
+                  <span className="text-[10px] text-slate-400 group-hover:text-white">Front</span>
+                </button>
+              )}
+              {sendToBack && (
+                <button
+                  onClick={sendToBack}
+                  className="flex-shrink-0 p-2 bg-slate-800/50 hover:bg-slate-700 rounded text-xs text-center transition-colors group"
+                  title="Send to Back"
+                >
+                  <Layers size={14} className="mx-auto mb-1 text-slate-400 group-hover:text-white opacity-50" />
+                  <span className="text-[10px] text-slate-400 group-hover:text-white">Back</span>
+                </button>
+              )}
+              {selectedIds.size > 1 && onGroup && (
+                <button
+                  onClick={onGroup}
+                  className="flex-shrink-0 p-2 bg-slate-800/50 hover:bg-slate-700 rounded text-xs text-center transition-colors group"
+                  title="Group Shapes"
+                >
+                  <Group size={14} className="mx-auto mb-1 text-slate-400 group-hover:text-white" />
+                  <span className="text-[10px] text-slate-400 group-hover:text-white">Group</span>
+                </button>
+              )}
+              {selectedShape?.groupId && selectedIds.size === 1 && onUngroup && (
+                <button
+                  onClick={onUngroup}
+                  className="flex-shrink-0 p-2 bg-slate-800/50 hover:bg-slate-700 rounded text-xs text-center transition-colors group"
+                  title="Ungroup Shapes"
+                >
+                  <Ungroup size={14} className="mx-auto mb-1 text-slate-400 group-hover:text-white" />
+                  <span className="text-[10px] text-slate-400 group-hover:text-white">Ungroup</span>
+                </button>
+              )}
+              {(selectedShape?.subtasks?.length || selectedShape?.expandedNodeIds) && (
+                <button
+                  onClick={() => selectedShape.expandedNodeIds ? onCollapseSubtasks?.(selectedShape.id) : onExpandSubtasks?.(selectedShape.id)}
+                  className="flex-shrink-0 p-2 bg-slate-800/50 hover:bg-slate-700 rounded text-xs text-center transition-colors group"
+                  title={selectedShape.expandedNodeIds ? "Collapse Nodes" : "Expand to Nodes"}
+                >
+                  {selectedShape.expandedNodeIds ? <Shrink size={14} className="mx-auto mb-1 text-slate-400 group-hover:text-white" /> : <Network size={14} className="mx-auto mb-1 text-slate-400 group-hover:text-white" />}
+                  <span className="text-[10px] text-slate-400 group-hover:text-white">{selectedShape.expandedNodeIds ? 'Collapse' : 'Expand'}</span>
+                </button>
+              )}
+              {selectedShape?.type === ShapeType.TASK && !selectedShape?.expandedNodeIds && addSubtask && (
+                <button
+                  onClick={() => addSubtask(selectedShape.id)}
+                  className="flex-shrink-0 p-2 bg-slate-800/50 hover:bg-slate-700 rounded text-xs text-center transition-colors group"
+                  title="Add Subtask"
+                >
+                  <Plus size={14} className="mx-auto mb-1 text-slate-400 group-hover:text-white" />
+                  <span className="text-[10px] text-slate-400 group-hover:text-white">Subtask</span>
+                </button>
+              )}
+              {triggerFileUpload && (
+                <button
+                  onClick={triggerFileUpload}
+                  className="flex-shrink-0 p-2 bg-slate-800/50 hover:bg-slate-700 rounded text-xs text-center transition-colors group"
+                  title="Attach Media"
+                >
+                  <ImageIcon size={14} className="mx-auto mb-1 text-slate-400 group-hover:text-white" />
+                  <span className="text-[10px] text-slate-400 group-hover:text-white">Attach</span>
+                </button>
+              )}
+            </div>
+
+            {/* AI Actions */}
+            {setShowAiModal && handleAIBrainstorm && selectedIds.size > 0 && (
+              <div>
+                <h4 className="text-slate-400 text-xs font-semibold mb-2 flex items-center gap-1">
+                  <Sparkles size={12} />
+                  AI Actions
+                </h4>
+                <div className="grid grid-cols-2 gap-1">
+                  <button
+                    onClick={() => handleAIBrainstorm('subtasks')}
+                    className="flex-shrink-0 p-2 bg-slate-800/50 hover:bg-nova-primary/20 hover:border-nova-primary/30 border border-transparent rounded text-xs text-center transition-colors group"
+                    title="Break Down into Subtasks"
+                  >
+                    <FileText size={12} className="mx-auto mb-1 text-slate-400 group-hover:text-nova-primary" />
+                    <span className="text-[9px] text-slate-400 group-hover:text-nova-primary">Break Down</span>
+                  </button>
+                  <button
+                    onClick={() => handleAIBrainstorm('nodes')}
+                    className="flex-shrink-0 p-2 bg-slate-800/50 hover:bg-nova-primary/20 hover:border-nova-primary/30 border border-transparent rounded text-xs text-center transition-colors group"
+                    title="Brainstorm Ideas"
+                  >
+                    <Lightbulb size={12} className="mx-auto mb-1 text-slate-400 group-hover:text-nova-primary" />
+                    <span className="text-[9px] text-slate-400 group-hover:text-nova-primary">Brainstorm</span>
+                  </button>
+                  <button
+                    onClick={() => handleAIBrainstorm('note')}
+                    className="flex-shrink-0 p-2 bg-slate-800/50 hover:bg-nova-primary/20 hover:border-nova-primary/30 border border-transparent rounded text-xs text-center transition-colors group"
+                    title="Create Note"
+                  >
+                    <FileText size={12} className="mx-auto mb-1 text-slate-400 group-hover:text-nova-primary" />
+                    <span className="text-[9px] text-slate-400 group-hover:text-nova-primary">Draft Note</span>
+                  </button>
+                  <button
+                    onClick={() => handleAIBrainstorm('sheet')}
+                    className="flex-shrink-0 p-2 bg-slate-800/50 hover:bg-nova-primary/20 hover:border-nova-primary/30 border border-transparent rounded text-xs text-center transition-colors group"
+                    title="Create Sheet"
+                  >
+                    <Table size={12} className="mx-auto mb-1 text-slate-400 group-hover:text-nova-primary" />
+                    <span className="text-[9px] text-slate-400 group-hover:text-nova-primary">Create Sheet</span>
+                  </button>
+                </div>
+              </div>
+            )}
+            </div>
+          ) : (
+            <div className="text-center text-slate-400 py-8">
+              <Zap size={32} className="mx-auto mb-2 opacity-50" />
+              <p className="text-sm">Select a shape to see actions</p>
             </div>
           )
         )}

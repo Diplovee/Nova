@@ -444,7 +444,7 @@ export const NovaBoard: React.FC<NovaBoardProps> = ({
       const remainingShapes = shapes.filter(s => !nodesToRemove.has(s.id));
 
       const updatedConnections = parent.connections.filter(c => !nodesToRemove.has(c.targetId));
-      
+
       const updatedParent = {
           ...parent,
           connections: updatedConnections,
@@ -453,6 +453,23 @@ export const NovaBoard: React.FC<NovaBoardProps> = ({
       };
 
       onUpdateShapes(remainingShapes.map(s => s.id === shapeId ? updatedParent : s));
+  };
+
+  const addSubtask = (shapeId: string) => {
+      const shape = shapes.find(s => s.id === shapeId);
+      if(!shape) return;
+      const newSubtask = {
+          id: generateId(),
+          title: "New Subtask",
+          completed: false
+      };
+      let updatedShape: Shape = {
+          ...shape,
+          subtasks: [...(shape.subtasks || []), newSubtask],
+          hideSubtasks: false
+      };
+      updatedShape = autoSizeShape(updatedShape);
+      onUpdateShapes(shapes.map(s => s.id === shapeId ? updatedShape : s));
   };
 
   // --- Add/Manipulate Shape Logic ---
@@ -1089,6 +1106,7 @@ export const NovaBoard: React.FC<NovaBoardProps> = ({
             onUngroup={handleUngroup}
             onExpandSubtasks={handleExpandSubtasks}
             onCollapseSubtasks={handleCollapseSubtasks}
+            addSubtask={addSubtask}
             onOpenImageModal={setImageModalAttachment}
         />
 
@@ -1145,6 +1163,18 @@ export const NovaBoard: React.FC<NovaBoardProps> = ({
         updateStyling={updateStyling}
         setActiveTool={setActiveTool}
         activeTool={activeTool}
+        duplicateShape={duplicateShape}
+        bringToFront={bringToFront}
+        sendToBack={sendToBack}
+        toggleLock={toggleLock}
+        onGroup={handleGroup}
+        onUngroup={handleUngroup}
+        onExpandSubtasks={handleExpandSubtasks}
+        onCollapseSubtasks={handleCollapseSubtasks}
+        setShowAiModal={setShowAiModal}
+        triggerFileUpload={() => fileInputRef.current?.click()}
+        addSubtask={addSubtask}
+        handleAIBrainstorm={handleAIBrainstorm}
       />
 
       {/* Image Preview Modal */}

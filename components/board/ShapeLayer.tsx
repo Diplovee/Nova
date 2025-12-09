@@ -46,7 +46,8 @@ interface ShapeLayerProps {
   onUngroup: () => void;
   onExpandSubtasks: (shapeId: string) => void;
   onCollapseSubtasks: (shapeId: string) => void;
-  
+  addSubtask: (shapeId: string) => void;
+
   // Helpers
   playAudio: (url: string) => void;
   autoSizeShape: (shape: Shape) => Shape;
@@ -102,6 +103,7 @@ export const ShapeLayer: React.FC<ShapeLayerProps> = ({
   onUngroup,
   onExpandSubtasks,
   onCollapseSubtasks,
+  addSubtask,
   playAudio,
   autoSizeShape,
   generateId
@@ -140,22 +142,7 @@ export const ShapeLayer: React.FC<ShapeLayerProps> = ({
     setShapesDirectly(shapes.map(s => s.id === shapeId ? { ...shape, subtasks: updatedSubtasks } : s));
   };
 
-  const addSubtask = (shapeId: string) => {
-    const shape = shapes.find(s => s.id === shapeId);
-    if(!shape) return;
-    const newSubtask = {
-        id: generateId(),
-        title: "New Subtask",
-        completed: false
-    };
-    let updatedShape: Shape = { 
-        ...shape, 
-        subtasks: [...(shape.subtasks || []), newSubtask],
-        hideSubtasks: false 
-    };
-    updatedShape = autoSizeShape(updatedShape);
-    onUpdateShapes(shapes.map(s => s.id === shapeId ? updatedShape : s));
-  };
+
 
   const getShapeStyle = (shape: Shape, isSelected: boolean) => {
     const baseStyle: React.CSSProperties = {};
@@ -223,57 +210,7 @@ export const ShapeLayer: React.FC<ShapeLayerProps> = ({
               onMouseLeave={onMouseLeave}
               onDoubleClick={(e) => onShapeDoubleClick(e, shape)}
             >
-              {/* Context Menu for Selected Item */}
-              {isSelected && (
-                <div className="absolute -top-14 left-1/2 -translate-x-1/2 bg-nova-card border border-slate-700 rounded-lg shadow-xl flex items-center p-1 gap-1 z-[100] animate-in slide-in-from-bottom-2 fade-in">
-                    
-                    {/* Expand/Collapse Subtasks */}
-                    {(hasSubtasks || shape.expandedNodeIds) && (
-                        <>
-                             {shape.expandedNodeIds ? (
-                                <button onClick={() => onCollapseSubtasks(shape.id)} className="p-2 hover:bg-slate-700 rounded text-nova-primary" title="Collapse Nodes">
-                                    <Shrink size={16}/>
-                                </button>
-                             ) : (
-                                <button onClick={() => onExpandSubtasks(shape.id)} className="p-2 hover:bg-slate-700 rounded text-slate-300 hover:text-white" title="Expand to Nodes">
-                                    <Network size={16}/>
-                                </button>
-                             )}
-                             <div className="w-px h-4 bg-slate-700 mx-1"/>
-                        </>
-                    )}
 
-                    {/* Grouping */}
-                    {selectedIds.size > 1 && (
-                        <button onClick={onGroup} className="p-2 hover:bg-slate-700 rounded text-slate-300 hover:text-white" title="Group">
-                            <Group size={16}/>
-                        </button>
-                    )}
-                    {shape.groupId && selectedIds.size === 1 && (
-                        <button onClick={onUngroup} className="p-2 hover:bg-slate-700 rounded text-slate-300 hover:text-white" title="Ungroup">
-                            <Ungroup size={16}/>
-                        </button>
-                    )}
-
-                    <div className="w-px h-4 bg-slate-700 mx-1"/>
-                    
-                    <button onClick={duplicateShape} className="p-2 hover:bg-slate-700 rounded text-slate-300 hover:text-white" title="Duplicate">
-                        <Copy size={16}/>
-                    </button>
-                    <button onClick={toggleLock} className={`p-2 hover:bg-slate-700 rounded ${shape.locked ? 'text-nova-primary' : 'text-slate-300'}`} title={shape.locked ? "Unlock" : "Lock"}>
-                        {shape.locked ? <Lock size={16}/> : <Unlock size={16}/>}
-                    </button>
-                    
-                    <div className="w-px h-4 bg-slate-700 mx-1"/>
-                    
-                    <button onClick={bringToFront} className="p-2 hover:bg-slate-700 rounded text-slate-300 hover:text-white" title="Bring to Front">
-                        <Layers size={16}/>
-                    </button>
-                    <button onClick={sendToBack} className="p-2 hover:bg-slate-700 rounded text-slate-300 hover:text-white" title="Send to Back">
-                        <Layers size={16} className="opacity-50"/>
-                    </button>
-                </div>
-              )}
 
               <div 
                 className={`w-full h-full relative overflow-hidden transition-all duration-200 flex flex-col ${
@@ -498,39 +435,7 @@ export const ShapeLayer: React.FC<ShapeLayerProps> = ({
                             )}
                         </div>
 
-                        {/* Footer Actions */}
-                        <div className="p-3 pt-0 flex justify-between items-center opacity-0 group-hover:opacity-100 transition-opacity">
-                            <div className="flex gap-1">
-                                {shape.type === ShapeType.TASK && !shape.expandedNodeIds && (
-                                    <button 
-                                        onClick={(e) => { e.stopPropagation(); addSubtask(shape.id); }}
-                                        className="p-1.5 hover:bg-slate-700 rounded text-slate-400 hover:text-white" title="Add Subtask"
-                                    >
-                                        <Plus size={14}/>
-                                    </button>
-                                )}
-                                <button 
-                                    onClick={(e) => { e.stopPropagation(); setShowAiModal(true); }}
-                                    className="p-1.5 hover:bg-slate-700 rounded text-slate-400 hover:text-nova-primary" title="AI Actions"
-                                >
-                                    <Sparkles size={14}/>
-                                </button>
-                                <button 
-                                    onClick={(e) => { e.stopPropagation(); triggerFileUpload(); }}
-                                    className="p-1.5 hover:bg-slate-700 rounded text-slate-400 hover:text-white" title="Attach Media"
-                                >
-                                    <ImageIcon size={14}/>
-                                </button>
-                            </div>
-                            
-                            {/* Connector Handles */}
-                            <div className="flex gap-2">
-                                <div 
-                                    className="w-3 h-3 rounded-full bg-slate-600 hover:bg-nova-primary cursor-crosshair transition-colors"
-                                    onMouseDown={(e) => onConnectionStart(e, shape.id, 'right')}
-                                />
-                            </div>
-                        </div>
+
                     </div>
                  )}
 
