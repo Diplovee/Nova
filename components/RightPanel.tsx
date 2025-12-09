@@ -142,7 +142,7 @@ const ColorPicker: React.FC<ColorPickerProps> = ({ color, onChange, onClose }) =
   };
 
   return (
-    <div className="absolute top-full left-0 mt-2 bg-nova-card border border-slate-700 rounded-lg shadow-xl p-3 z-[200] w-64">
+    <div className="absolute top-full right-0 mt-2 bg-nova-card border border-slate-700 rounded-lg shadow-xl p-3 z-[200] w-64">
       <div className="flex items-center justify-between mb-3">
         <span className="text-sm font-medium text-white">Color Picker</span>
         <button onClick={onClose} className="text-slate-400 hover:text-white">×</button>
