@@ -327,8 +327,8 @@ export const NoteEditor: React.FC<NoteEditorProps> = ({ shape, onClose, onUpdate
   const ToolbarSeparator = () => <div className="w-px h-6 bg-slate-700 mx-1" />;
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 backdrop-blur-sm animate-in fade-in duration-200">
-      
+    <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/70 backdrop-blur-sm animate-in fade-in duration-200">
+
       <input type="file" accept="image/*" ref={fileInputRef} className="hidden" onChange={handleImageUpload} />
 
       {/* Main Window */}
