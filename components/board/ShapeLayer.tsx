@@ -2,7 +2,8 @@
 import React, { useRef, useEffect } from 'react';
 import { Shape, ShapeType, Attachment, ShapeStyling, Side } from '../../types';
 import { SimpleMarkdown } from '../ui/SimpleMarkdown';
-import { 
+import { ContextMenu } from '../ContextMenu';
+import {
   LayoutTemplate, Lightbulb, Database, Type, Square, Circle, FileText, Table, Image as ImageIcon, Mic,
   Lock, PlayCircle, CheckCircle2, Sparkles, Plus, Network, Shrink, Copy, MoreVertical,
   ArrowUpCircle, ArrowDownCircle, Unlock, Minus, PauseCircle, Group, Ungroup, Layers, CornerDownRight
@@ -53,6 +54,11 @@ interface ShapeLayerProps {
   playAudio: (url: string) => void;
   autoSizeShape: (shape: Shape) => Shape;
   generateId: () => string;
+
+  // Context menu
+  onCloseContextMenu?: (closeFn: () => void) => void;
+  onSetContextMenuTriggerId?: (id: string | null) => void;
+  contextMenuTriggerId?: string | null;
 }
 
 const SHAPE_ICONS: Record<ShapeType, React.ElementType> = {
@@ -108,24 +114,22 @@ export const ShapeLayer: React.FC<ShapeLayerProps> = ({
   setSelectedIds,
   playAudio,
   autoSizeShape,
-  generateId
+  generateId,
+  onCloseContextMenu,
+  onSetContextMenuTriggerId,
+  contextMenuTriggerId
 }) => {
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
-  const [contextMenu, setContextMenu] = React.useState<{shapeId: string, x: number, y: number} | null>(null);
+  const [contextMenu, setContextMenu] = React.useState<{triggerShapeId: string, x: number, y: number} | null>(null);
 
-  // Close context menu when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      // Don't close if clicking on the menu itself
-      const target = e.target as HTMLElement;
-      if (target.closest('[data-context-menu]')) return;
-      setContextMenu(null);
-    };
-    if (contextMenu) {
-      document.addEventListener('mousedown', handleClickOutside);
-      return () => document.removeEventListener('mousedown', handleClickOutside);
+  // Expose close function to parent
+  React.useEffect(() => {
+    if (onCloseContextMenu) {
+      onCloseContextMenu(() => setContextMenu(null));
     }
-  }, [contextMenu]);
+  }, [onCloseContextMenu]);
+
+  // Context menu closing is now handled by the ContextMenu component itself
 
   // Auto Resize Textarea
   useEffect(() => {
@@ -211,6 +215,7 @@ export const ShapeLayer: React.FC<ShapeLayerProps> = ({
           return (
             <div
               key={shape.id}
+              data-shape
               className={`absolute group transition-shadow duration-200 select-none ${
                   isSelected && !isRect ? 'z-[90]' : 'z-10'
               }`}
@@ -229,15 +234,17 @@ export const ShapeLayer: React.FC<ShapeLayerProps> = ({
               onContextMenu={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                if (!shape.locked) {
-                  // Select this shape (deselecting any others)
-                  setSelectedIds(new Set([shape.id]));
-                  setContextMenu({
-                    shapeId: shape.id,
-                    x: e.clientX,
-                    y: e.clientY
-                  });
+                // Select this shape (deselecting any others)
+                setSelectedIds(new Set([shape.id]));
+                // Update triggerId in parent
+                if (onSetContextMenuTriggerId) {
+                  onSetContextMenuTriggerId(shape.id);
                 }
+                setContextMenu({
+                  triggerShapeId: shape.id,
+                  x: e.clientX,
+                  y: e.clientY
+                });
               }}
             >
 
@@ -484,106 +491,30 @@ export const ShapeLayer: React.FC<ShapeLayerProps> = ({
       })}
 
       {/* Right-click Context Menu */}
-      {contextMenu && (
-        <div
-          className="absolute z-[1000] bg-nova-card border border-slate-700/50 rounded-lg shadow-xl p-3 flex flex-col gap-2 animate-in fade-in zoom-in-95 duration-200 max-w-[240px]"
-          style={{
-            left: contextMenu.x,
-            top: contextMenu.y,
-            transform: 'translate(-50%, -100%) translateY(-8px)'
-          }}
-          onMouseDown={(e) => e.stopPropagation()} // Prevent closing when clicking menu
-        >
-          {(() => {
-            const menuShape = shapes.find(s => s.id === contextMenu.shapeId);
-            if (!menuShape) return null;
+      {contextMenu && (() => {
+        const menuShape = shapes.find(s => s.id === contextMenu.triggerShapeId);
+        if (!menuShape) return null;
 
-            return (
-              <>
-                {/* Quick Actions */}
-                <div className="grid grid-cols-3 gap-1">
-                  {duplicateShape && (
-                    <button
-                      onClick={() => { duplicateShape(); setContextMenu(null); }}
-                      className="flex-shrink-0 p-2 bg-slate-800/50 hover:bg-slate-700 rounded text-xs text-center transition-colors"
-                      title="Duplicate"
-                    >
-                      <Copy size={14} className="mx-auto mb-1 text-slate-400" />
-                      <span className="text-[10px] text-slate-400">Copy</span>
-                    </button>
-                  )}
-                  {bringToFront && (
-                    <button
-                      onClick={() => { bringToFront(); setContextMenu(null); }}
-                      className="flex-shrink-0 p-2 bg-slate-800/50 hover:bg-slate-700 rounded text-xs text-center transition-colors"
-                      title="Bring to Front"
-                    >
-                      <Layers size={14} className="mx-auto mb-1 text-slate-400" />
-                      <span className="text-[10px] text-slate-400">Front</span>
-                    </button>
-                  )}
-                  {sendToBack && (
-                    <button
-                      onClick={() => { sendToBack(); setContextMenu(null); }}
-                      className="flex-shrink-0 p-2 bg-slate-800/50 hover:bg-slate-700 rounded text-xs text-center transition-colors"
-                      title="Send to Back"
-                    >
-                      <Layers size={14} className="mx-auto mb-1 text-slate-400 opacity-50" />
-                      <span className="text-[10px] text-slate-400">Back</span>
-                    </button>
-                  )}
-                  {toggleLock && (
-                    <button
-                      onClick={() => { toggleLock(); setContextMenu(null); }}
-                      className={`flex-shrink-0 p-2 bg-slate-800/50 hover:bg-slate-700 rounded text-xs text-center transition-colors ${menuShape.locked ? 'bg-red-500/10' : ''}`}
-                      title={menuShape.locked ? "Unlock" : "Lock"}
-                    >
-                      {menuShape.locked ? <Lock size={14} className="mx-auto mb-1 text-red-400" /> : <Unlock size={14} className="mx-auto mb-1 text-slate-400" />}
-                      <span className="text-[10px] text-slate-400">{menuShape.locked ? 'Unlock' : 'Lock'}</span>
-                    </button>
-                  )}
-                  {selectedIds.size > 1 && onGroup && (
-                    <button
-                      onClick={() => { onGroup(); setContextMenu(null); }}
-                      className="flex-shrink-0 p-2 bg-slate-800/50 hover:bg-slate-700 rounded text-xs text-center transition-colors"
-                      title="Group Shapes"
-                    >
-                      <Group size={14} className="mx-auto mb-1 text-slate-400" />
-                      <span className="text-[10px] text-slate-400">Group</span>
-                    </button>
-                  )}
-                  {menuShape.groupId && selectedIds.size === 1 && onUngroup && (
-                    <button
-                      onClick={() => { onUngroup(); setContextMenu(null); }}
-                      className="flex-shrink-0 p-2 bg-slate-800/50 hover:bg-slate-700 rounded text-xs text-center transition-colors"
-                      title="Ungroup Shapes"
-                    >
-                      <Ungroup size={14} className="mx-auto mb-1 text-slate-400" />
-                      <span className="text-[10px] text-slate-400">Ungroup</span>
-                    </button>
-                  )}
-                </div>
-
-                {/* Quick AI Actions */}
-                {setShowAiModal && (
-                  <>
-                    <div className="h-px bg-slate-700/50 w-full" />
-                    <div className="grid grid-cols-2 gap-1">
-                      <button
-                        onClick={() => { setShowAiModal(true); setContextMenu(null); }}
-                        className="flex-shrink-0 p-2 bg-slate-800/50 hover:bg-nova-primary/20 hover:border-nova-primary/30 border border-transparent rounded text-xs text-center transition-colors"
-                      >
-                        <Sparkles size={12} className="mx-auto mb-1 text-slate-400 group-hover:text-nova-primary" />
-                        <span className="text-[9px] text-slate-400 group-hover:text-nova-primary">AI Actions</span>
-                      </button>
-                    </div>
-                  </>
-                )}
-              </>
-            );
-          })()}
-        </div>
-      )}
+        return (
+          <ContextMenu
+            triggerShape={menuShape}
+            selectedIds={selectedIds}
+            x={contextMenu.x}
+            y={contextMenu.y}
+            onClose={() => {
+              setContextMenu(null);
+              if (onSetContextMenuTriggerId) onSetContextMenuTriggerId(null);
+            }}
+            onDuplicate={duplicateShape}
+            onBringToFront={bringToFront}
+            onSendToBack={sendToBack}
+            onToggleLock={toggleLock}
+            onGroup={onGroup}
+            onUngroup={onUngroup}
+            onAIActions={() => setShowAiModal(true)}
+          />
+        );
+      })()}
     </>
   );
 };

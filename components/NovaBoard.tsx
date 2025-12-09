@@ -570,14 +570,18 @@ export const NovaBoard: React.FC<NovaBoardProps> = ({
 
     if (isBackground) {
         if (!e.shiftKey) {
-            setSelectedIds(new Set());
+            if (!contextMenuTriggerId) {
+                setSelectedIds(new Set());
+            }
             setSelectedConnection(null);
             setConnectionDraft(null);
             setIsEditing(false);
             setEditingId(null);
             setShowAiModal(false);
+            // Close context menus when clicking on background
+            closeContextMenuAndResetTrigger();
         }
-      
+
         if (activeTool === 'SELECT') {
             const coords = toCanvasCoordinates(e.clientX, e.clientY);
             setSelectionBox({ start: coords, end: coords });
@@ -588,7 +592,26 @@ export const NovaBoard: React.FC<NovaBoardProps> = ({
     }
   };
 
+  // State for closing context menus
+  const [closeContextMenu, setCloseContextMenu] = useState<() => void>(() => {});
+  const [contextMenuTriggerId, setContextMenuTriggerId] = useState<string | null>(null);
+
+  const closeContextMenuAndResetTrigger = () => {
+    closeContextMenu();
+    setContextMenuTriggerId(null);
+  };
+
   const handleShapeMouseDown = (e: React.MouseEvent, shape: Shape) => {
+    // Close context menu if open
+    if (contextMenuTriggerId) {
+      closeContextMenuAndResetTrigger();
+    }
+
+    // Close any open context menus when clicking on background or performing definitive actions
+    setSelectedConnection(null);
+
+    e.stopPropagation();
+
     if (activeTool === 'HAND') return;
     if (isCreationTool(activeTool)) return;
     if (activeTool === ShapeType.VOICE) return;
@@ -859,6 +882,9 @@ export const NovaBoard: React.FC<NovaBoardProps> = ({
   // --- Keyboard Shortcuts ---
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+        // Ignore shortcuts when dragging or resizing
+        if (isDragging || isResizing) return;
+
         if (['Delete', 'Backspace'].includes(e.key) && !isEditing) {
             if ((e.target as HTMLElement).tagName === 'INPUT') return;
 
@@ -867,6 +893,12 @@ export const NovaBoard: React.FC<NovaBoardProps> = ({
             } else if (selectedIds.size > 0) {
                 deleteSelected();
             }
+        }
+        if ((e.ctrlKey || e.metaKey) && e.key === 'a') {
+            e.preventDefault();
+            // Select all shapes (but not connections)
+            setSelectedIds(new Set(shapes.map(s => s.id)));
+            setSelectedConnection(null);
         }
         if ((e.ctrlKey || e.metaKey) && e.key === 'z') {
             e.preventDefault();
@@ -892,7 +924,7 @@ export const NovaBoard: React.FC<NovaBoardProps> = ({
     return () => {
         window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [selectedIds, selectedConnection, shapes, isEditing, onUpdateShapes, onUndo, onRedo, activeTool]);
+  }, [selectedIds, selectedConnection, shapes, isEditing, onUpdateShapes, onUndo, onRedo, activeTool, isDragging, isResizing, onRedo, onUndo, duplicateShape, handleUngroup, handleGroup, deleteConnection, deleteSelected, setSelectedIds, setSelectedConnection]);
 
   // --- AI Logic ---
   const handleAIBrainstorm = async (mode: 'subtasks' | 'nodes' | 'refine' | 'custom' | 'note' | 'sheet', customPrompt?: string) => {
@@ -1059,7 +1091,7 @@ export const NovaBoard: React.FC<NovaBoardProps> = ({
           onClearSelection={() => setSelectedConnection(null)}
         />
 
-        <ShapeLayer 
+        <ShapeLayer
             shapes={shapes}
             selectedIds={selectedIds}
             editingId={editingId}
@@ -1109,6 +1141,9 @@ export const NovaBoard: React.FC<NovaBoardProps> = ({
             addSubtask={addSubtask}
             setSelectedIds={setSelectedIds}
             onOpenImageModal={setImageModalAttachment}
+            onCloseContextMenu={setCloseContextMenu}
+            onSetContextMenuTriggerId={setContextMenuTriggerId}
+            contextMenuTriggerId={contextMenuTriggerId}
         />
 
         {selectionBox && (
