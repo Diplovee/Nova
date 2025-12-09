@@ -197,6 +197,7 @@ const App: React.FC = () => {
   const [currentPage, setCurrentPage] = useState<Page>(Page.DASHBOARD);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true);
   const [isRightPanelCollapsed, setIsRightPanelCollapsed] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
   const [editingItem, setEditingItem] = useState<Shape | null>(null);
 
   // --- Session Management ---
@@ -404,6 +405,16 @@ const App: React.FC = () => {
 
   const toggleSidebar = () => setIsSidebarCollapsed(!isSidebarCollapsed);
 
+  const toggleFullscreen = () => {
+    // Toggle fullscreen mode completely
+    const newFullscreenState = !isFullscreen;
+    setIsFullscreen(newFullscreenState);
+    // Also hide/show right panel when toggling fullscreen
+    if (newFullscreenState) {
+      setIsRightPanelCollapsed(true);
+    }
+  };
+
   // --- Render ---
   if (showSplash) {
       return <SplashScreen />;
@@ -436,8 +447,7 @@ const App: React.FC = () => {
             canRedo={historyIndex < history.length - 1}
             onOpenEditor={setEditingItem}
             isRightPanelCollapsed={isRightPanelCollapsed}
-            toggleRightPanel={() => setIsRightPanelCollapsed(!isRightPanelCollapsed)}
-            toggleSidebar={toggleSidebar}
+            toggleFullscreen={toggleFullscreen}
           />
         );
       case Page.TASKS:
@@ -515,16 +525,22 @@ const App: React.FC = () => {
 
   return (
     <div className="flex w-full h-screen bg-[#1E1E28] text-white overflow-hidden font-sans">
-      <Sidebar 
-        currentPage={currentPage} 
-        setPage={handlePageChange} 
-        isCollapsed={isSidebarCollapsed}
-        toggleSidebar={toggleSidebar}
-      />
-      
-      <main 
+      {!isFullscreen && (
+        <Sidebar
+          currentPage={currentPage}
+          setPage={handlePageChange}
+          isCollapsed={isSidebarCollapsed}
+          toggleSidebar={toggleSidebar}
+        />
+      )}
+
+      <main
         className={`flex-1 relative h-full overflow-hidden transition-all duration-300 ${
-          isSidebarCollapsed ? 'ml-20' : 'ml-64'
+          isFullscreen
+            ? 'ml-0'
+            : isSidebarCollapsed
+              ? 'ml-20'
+              : 'ml-64'
         }`}
       >
         {/* Active Board Indicator - Centered on non-board pages */}

@@ -22,8 +22,7 @@ interface BoardUIProps {
   triggerImageToolUpload: () => void;
 
   // Panel Toggles
-  toggleSidebar: () => void;
-  toggleRightPanel: () => void;
+  toggleFullscreen: () => void;
 
   // Selection Context
   selectedConnection: { from: string, to: string, midPoint?: Point } | null;
@@ -61,8 +60,7 @@ export const BoardUI: React.FC<BoardUIProps> = ({
   defaultConnectionStyle,
   setDefaultConnectionStyle,
   triggerImageToolUpload,
-  toggleSidebar,
-  toggleRightPanel,
+  toggleFullscreen,
   selectedConnection,
   selectedIds,
   shapes,
@@ -137,11 +135,8 @@ export const BoardUI: React.FC<BoardUIProps> = ({
              </div>
          </div>
          <div className="flex items-center gap-1">
-             <CustomTooltip content="Toggle left sidebar">
-               <ToolButton icon={PanelLeft} title="Sidebar" isActive={false} onClick={toggleSidebar} />
-             </CustomTooltip>
-             <CustomTooltip content="Toggle right panel">
-               <ToolButton icon={PanelRight} title="Right Panel" isActive={false} onClick={toggleRightPanel} />
+             <CustomTooltip content="Toggle fullscreen mode">
+               <ToolButton icon={Maximize2} title="Fullscreen" isActive={false} onClick={toggleFullscreen} />
              </CustomTooltip>
          </div>
       </div>
