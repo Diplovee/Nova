@@ -282,11 +282,11 @@ export const RightPanel: React.FC<RightPanelProps> = ({
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id as TabType)}
-              className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all flex flex-col items-center gap-0.5 ${
-                isActive
-                  ? 'bg-nova-primary text-white shadow-lg'
-                  : 'bg-slate-800/50 text-slate-400 hover:text-slate-300 hover:bg-slate-700/50'
-              }`}
+        className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all flex flex-col items-center gap-0.5 ${
+          isActive
+            ? 'bg-nova-primary text-black shadow-lg'
+            : 'bg-slate-800/50 text-slate-400 hover:text-slate-300 hover:bg-slate-700/50'
+        }`}
             >
               <Icon size={14} />
               {tab.label}
@@ -302,23 +302,35 @@ export const RightPanel: React.FC<RightPanelProps> = ({
           <div>
             <h3 className="text-white font-bold mb-3 flex items-center gap-2">View Controls</h3>
             <div className="flex flex-col bg-nova-card/90 backdrop-blur-md border border-slate-700/50 rounded-xl overflow-hidden mb-3">
-              <button onClick={handleFitToScreen} className="p-3 hover:bg-slate-700 text-slate-300 hover:text-nova-primary transition-colors border-b border-slate-700/50" title="Fit to Screen">
-                <Scan size={20} />
-              </button>
-              <button onClick={handleResetView} className="p-3 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors" title="Reset View">
-                <Crosshair size={20} />
-              </button>
+              <CustomTooltip content="Fit to Screen">
+                <button onClick={handleFitToScreen} className="w-full p-3 hover:bg-slate-700 text-slate-300 hover:text-nova-primary transition-colors border-b border-slate-700/50 flex items-center gap-2">
+                  <Scan size={20} />
+                  <span className="text-sm">Fit to Screen</span>
+                </button>
+              </CustomTooltip>
+              <CustomTooltip content="Reset View">
+                <button onClick={handleResetView} className="w-full p-3 hover:bg-slate-700 text-slate-300 hover:text-nova-primary transition-colors flex items-center gap-2">
+                  <Crosshair size={20} />
+                  <span className="text-sm">Reset View</span>
+                </button>
+              </CustomTooltip>
             </div>
             <div className="flex flex-col bg-nova-card/90 backdrop-blur-md border border-slate-700/50 rounded-xl overflow-hidden">
-              <button onClick={handleZoomIn} className="p-3 hover:bg-slate-700 text-slate-300 hover:text-white border-b border-slate-700/50 transition-colors" title="Zoom In">
-                <ZoomIn size={20} />
-              </button>
+              <CustomTooltip content="Zoom In">
+                <button onClick={handleZoomIn} className="w-full p-3 hover:bg-slate-700 text-slate-300 hover:text-nova-primary border-b border-slate-700/50 transition-colors flex items-center gap-2">
+                  <ZoomIn size={20} />
+                  <span className="text-sm">Zoom In</span>
+                </button>
+              </CustomTooltip>
               <div className="py-1 bg-slate-800 text-center text-[10px] font-bold text-slate-400 select-none cursor-default">
                 {Math.round(scale * 100)}%
               </div>
-              <button onClick={handleZoomOut} className="p-3 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors" title="Zoom Out">
-                <ZoomOut size={20} />
-              </button>
+              <CustomTooltip content="Zoom Out">
+                <button onClick={handleZoomOut} className="w-full p-3 hover:bg-slate-700 text-slate-300 hover:text-nova-primary transition-colors flex items-center gap-2">
+                  <ZoomOut size={20} />
+                  <span className="text-sm">Zoom Out</span>
+                </button>
+              </CustomTooltip>
             </div>
           </div>
         )}
