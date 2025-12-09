@@ -626,10 +626,17 @@ export const ShapeLayer: React.FC<ShapeLayerProps> = ({
                  {/* Resize Handles */}
                  {isSelected && !shape.locked && (
                      <>
+                        {/* Corner handles */}
                         <div className="absolute -top-1 -left-1 w-3 h-3 bg-white border border-nova-primary rounded-full cursor-nwse-resize z-50" onMouseDown={(e) => onResizeMouseDown(e, 'nw', shape)}/>
                         <div className="absolute -top-1 -right-1 w-3 h-3 bg-white border border-nova-primary rounded-full cursor-nesw-resize z-50" onMouseDown={(e) => onResizeMouseDown(e, 'ne', shape)}/>
                         <div className="absolute -bottom-1 -left-1 w-3 h-3 bg-white border border-nova-primary rounded-full cursor-nesw-resize z-50" onMouseDown={(e) => onResizeMouseDown(e, 'sw', shape)}/>
                         <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-white border border-nova-primary rounded-full cursor-nwse-resize z-50" onMouseDown={(e) => onResizeMouseDown(e, 'se', shape)}/>
+
+                        {/* Middle edge handles */}
+                        <div className="absolute -top-1 left-1/2 transform -translate-x-1/2 w-3 h-3 bg-white border border-nova-primary rounded-full cursor-ns-resize z-50" onMouseDown={(e) => onResizeMouseDown(e, 'n', shape)}/>
+                        <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-3 h-3 bg-white border border-nova-primary rounded-full cursor-ns-resize z-50" onMouseDown={(e) => onResizeMouseDown(e, 's', shape)}/>
+                        <div className="absolute top-1/2 -left-1 transform -translate-y-1/2 w-3 h-3 bg-white border border-nova-primary rounded-full cursor-ew-resize z-50" onMouseDown={(e) => onResizeMouseDown(e, 'w', shape)}/>
+                        <div className="absolute top-1/2 -right-1 transform -translate-y-1/2 w-3 h-3 bg-white border border-nova-primary rounded-full cursor-ew-resize z-50" onMouseDown={(e) => onResizeMouseDown(e, 'e', shape)}/>
                      </>
                  )}
               </div>
