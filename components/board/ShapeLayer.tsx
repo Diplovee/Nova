@@ -159,7 +159,7 @@ export const ShapeLayer: React.FC<ShapeLayerProps> = ({
 
   const getShapeStyle = (shape: Shape, isSelected: boolean) => {
     const baseStyle: React.CSSProperties = {};
-    
+
     // Apply background color from styling if present, or legacy color
     if (shape.styling?.fillColor) {
         baseStyle.backgroundColor = shape.styling.fillColor;
@@ -169,8 +169,8 @@ export const ShapeLayer: React.FC<ShapeLayerProps> = ({
         baseStyle.backgroundColor = '#272732'; // Default Nova Card
     }
 
-    // Border handling
-    if (shape.styling?.borderColor) {
+    // Border handling - skip default borders for images, but allow user-set borders
+    if (shape.styling?.borderColor && shape.styling.borderColor !== 'transparent') {
         baseStyle.borderColor = shape.styling.borderColor;
         baseStyle.borderWidth = shape.styling.borderWidth ?? 1;
         baseStyle.borderStyle = shape.styling.borderStyle ?? 'solid';
@@ -183,6 +183,7 @@ export const ShapeLayer: React.FC<ShapeLayerProps> = ({
          baseStyle.borderColor = '#475569';
          baseStyle.borderRadius = 16;
     }
+    // Images get no default border, only user-selected borders
 
     if (isSelected && shape.type === ShapeType.RECTANGLE) {
         baseStyle.borderColor = '#22d3ee';
@@ -306,7 +307,7 @@ export const ShapeLayer: React.FC<ShapeLayerProps> = ({
                  )}
 
                  {isImageShape ? (
-                     <div className="w-full h-full bg-black/40 flex items-center justify-center overflow-hidden">
+                     <div className="w-full h-full flex items-center justify-center overflow-hidden">
                          {shape.attachments && shape.attachments[0] ? (
                              <img src={shape.attachments[0].url} alt={shape.attachments[0].name} className="w-full h-full object-contain" />
                          ) : (
