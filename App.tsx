@@ -363,6 +363,12 @@ const App: React.FC = () => {
       } else {
           setCurrentPage(page);
       }
+
+      // Exit fullscreen when leaving the board view
+      if (page !== Page.NOVA_BOARD && isFullscreen) {
+          setIsFullscreen(false);
+          setIsRightPanelCollapsed(false);
+      }
   };
 
   const handleOnboardingComplete = () => {
@@ -405,13 +411,19 @@ const App: React.FC = () => {
 
   const toggleSidebar = () => setIsSidebarCollapsed(!isSidebarCollapsed);
 
-  const toggleFullscreen = () => {
-    // Toggle fullscreen mode completely
-    const newFullscreenState = !isFullscreen;
-    setIsFullscreen(newFullscreenState);
-    // Also hide/show right panel when toggling fullscreen
-    setIsRightPanelCollapsed(newFullscreenState);
-  };
+// Only allow fullscreen on the board page
+const canToggleFullscreen = currentPage === Page.NOVA_BOARD;
+
+const toggleFullscreen = () => {
+  // Only toggle fullscreen if we're on the board page
+  if (!canToggleFullscreen) return;
+
+  // Toggle fullscreen mode completely
+  const newFullscreenState = !isFullscreen;
+  setIsFullscreen(newFullscreenState);
+  // Also hide/show right panel when toggling fullscreen
+  setIsRightPanelCollapsed(newFullscreenState);
+};
 
   // --- Render ---
   if (showSplash) {
@@ -569,7 +581,7 @@ const App: React.FC = () => {
                     </div>
                 ) : (
                     <div className="flex items-center gap-2 bg-black/40 backdrop-blur-md text-white px-4 py-2 rounded-full border border-white/10 hover:border-nova-primary/50 transition-colors group">
-                        <button onClick={() => setCurrentPage(Page.DASHBOARD)} className="hover:text-nova-primary"><ArrowLeft size={14}/></button>
+                        <button onClick={() => handlePageChange(Page.DASHBOARD)} className="hover:text-nova-primary"><ArrowLeft size={14}/></button>
                         <div className="w-px h-3 bg-white/20" />
                         <div className="w-2 h-2 rounded-full bg-nova-primary animate-pulse" />
                         <span 
