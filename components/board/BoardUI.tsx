@@ -3,9 +3,8 @@ import { ToolButton } from '../ui/ToolButton';
 import { CustomTooltip } from '../ui/CustomTooltip';
 import { ShapeType, Shape, ConnectionStyle, Point, Side, ShapeStyling, Connection } from '../../types';
 import {
-  LayoutTemplate, Lightbulb, Square, Type, Image as ImageIcon, Mic, Link as LinkIcon, Minus, MoreHorizontal, MoreVertical, GitCommitHorizontal, FileText, Table, Database, Maximize2, Minimize2, Sparkles, XCircle, Loader2, ArrowUp, ArrowRight, ArrowDown, ArrowLeft, Trash2, MousePointer2, Hand, Undo2, Redo2, PanelLeft, PanelRight
+  LayoutTemplate, Lightbulb, Square, Type, Image as ImageIcon, Mic, Link as LinkIcon, Minus, MoreHorizontal, MoreVertical, GitCommitHorizontal, FileText, Table, Database, Maximize2, Minimize2, Sparkles, XCircle, Loader2, ArrowUp, ArrowRight, ArrowDown, ArrowLeft, Trash2, MousePointer2, Hand, Undo2, Redo2
 } from 'lucide-react';
-import { RightPanel } from '../RightPanel';
 
 interface BoardUIProps {
   activeTool: string;
@@ -23,6 +22,7 @@ interface BoardUIProps {
 
   // Panel Toggles
   toggleFullscreen: () => void;
+  isFullscreen: boolean;
 
   // Selection Context
   selectedConnection: { from: string, to: string, midPoint?: Point } | null;
@@ -61,6 +61,7 @@ export const BoardUI: React.FC<BoardUIProps> = ({
   setDefaultConnectionStyle,
   triggerImageToolUpload,
   toggleFullscreen,
+  isFullscreen,
   selectedConnection,
   selectedIds,
   shapes,
@@ -76,12 +77,30 @@ export const BoardUI: React.FC<BoardUIProps> = ({
   loadingIds,
   handleAIBrainstorm
 }) => {
+  // Animated fullscreen toggle icon
+  const FullscreenIcon = () => (
+    <div className="relative w-4 h-4 overflow-hidden">
+      <Maximize2
+        size={16}
+        className={`absolute inset-0 transition-all duration-300 ${
+          isFullscreen ? 'transform scale-0 rotate-180 opacity-0' : 'transform scale-100 rotate-0 opacity-100'
+        }`}
+      />
+      <Minimize2
+        size={16}
+        className={`absolute inset-0 transition-all duration-300 ${
+          isFullscreen ? 'transform scale-100 rotate-0 opacity-100' : 'transform scale-0 rotate-180 opacity-0'
+        }`}
+      />
+    </div>
+  );
+
   return (
     <>
       {/* Toolbar */}
       <div className={`absolute bg-nova-card/90 backdrop-blur-md border border-slate-700/50 rounded-2xl p-2 shadow-float flex items-center gap-2 transition-all duration-300 z-[102]`}
         style={{
-          left: `calc((100vw - 256px) / 2 - 300px)`, /* Center on board area with 300px left offset */
+          left: isFullscreen ? `calc(50vw - 300px)` : `calc((100vw - 256px) / 2 - 300px)`, /* Center on full viewport when fullscreen */
           bottom: '8px',
           transform: 'none'
         }}>
@@ -135,8 +154,13 @@ export const BoardUI: React.FC<BoardUIProps> = ({
              </div>
          </div>
          <div className="flex items-center gap-1">
-             <CustomTooltip content="Toggle fullscreen mode">
-               <ToolButton icon={Maximize2} title="Fullscreen" isActive={false} onClick={toggleFullscreen} />
+             <CustomTooltip content={`Toggle fullscreen mode`}>
+               <ToolButton
+                 icon={FullscreenIcon}
+                 title="Fullscreen"
+                 isActive={false}
+                 onClick={toggleFullscreen}
+               />
              </CustomTooltip>
          </div>
       </div>

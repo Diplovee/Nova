@@ -410,9 +410,7 @@ const App: React.FC = () => {
     const newFullscreenState = !isFullscreen;
     setIsFullscreen(newFullscreenState);
     // Also hide/show right panel when toggling fullscreen
-    if (newFullscreenState) {
-      setIsRightPanelCollapsed(true);
-    }
+    setIsRightPanelCollapsed(newFullscreenState);
   };
 
   // --- Render ---
@@ -447,6 +445,7 @@ const App: React.FC = () => {
             canRedo={historyIndex < history.length - 1}
             onOpenEditor={setEditingItem}
             isRightPanelCollapsed={isRightPanelCollapsed}
+            isFullscreen={isFullscreen}
             toggleFullscreen={toggleFullscreen}
           />
         );
