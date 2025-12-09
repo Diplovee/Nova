@@ -1,6 +1,6 @@
 import React from 'react';
-import { Shape } from '../types';
-import { Copy, Layers, Lock, Unlock, Group, Ungroup, Sparkles } from 'lucide-react';
+import { Shape, ShapeType } from '../types';
+import { Copy, Layers, Lock, Unlock, Group, Ungroup, Sparkles, Network, Shrink, Plus, Trash2 } from 'lucide-react';
 import { CustomTooltip } from './ui/CustomTooltip';
 
 interface ContextMenuProps {
@@ -16,6 +16,10 @@ interface ContextMenuProps {
   onGroup: () => void;
   onUngroup: () => void;
   onAIActions: () => void;
+  onExpandSubtasks?: (shapeId: string) => void;
+  onCollapseSubtasks?: (shapeId: string) => void;
+  onAddSubtask?: (shapeId: string) => void;
+  onClearAllSubtasks?: () => void;
 }
 
 export const ContextMenu: React.FC<ContextMenuProps> = ({
@@ -30,7 +34,11 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
   onToggleLock,
   onGroup,
   onUngroup,
-  onAIActions
+  onAIActions,
+  onExpandSubtasks,
+  onCollapseSubtasks,
+  onAddSubtask,
+  onClearAllSubtasks
 }) => {
   return (
     <>
@@ -49,8 +57,7 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
         className="absolute z-[1000] bg-nova-card border border-slate-700/50 rounded-lg shadow-xl p-1 animate-in fade-in zoom-in-95 duration-150 max-w-[200px]"
         style={{
           left: x,
-          top: y,
-          transform: 'translate(-50%, -100%) translateY(-8px)'
+          top: y
         }}
         onClick={(e) => e.stopPropagation()} // Prevent backdrop close when clicking menu
       >
@@ -142,6 +149,65 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
             </CustomTooltip>
           )}
         </div>
+
+        {/* Task Actions - only show for tasks */}
+        {(triggerShape.type === ShapeType.TASK || triggerShape.type === ShapeType.IDEA) && (
+          <>
+            <div className="h-px bg-slate-700/50 my-1" />
+
+            {/* Subtask Expansion/Collapse */}
+            {(triggerShape.subtasks?.length || triggerShape.expandedNodeIds) && onExpandSubtasks && onCollapseSubtasks && (
+              <CustomTooltip content={triggerShape.expandedNodeIds ? "Collapse expanded nodes" : "Expand to subtasks on canvas"}>
+                <button
+                  onClick={() => {
+                    if (triggerShape.expandedNodeIds) {
+                      onCollapseSubtasks(triggerShape.id);
+                    } else {
+                      onExpandSubtasks(triggerShape.id);
+                    }
+                    onClose();
+                  }}
+                  className="flex items-center gap-2 px-3 py-2 text-sm hover:bg-slate-700/50 rounded text-slate-300 hover:text-white transition-colors w-full text-left"
+                >
+                  {triggerShape.expandedNodeIds ? <Shrink size={16} /> : <Network size={16} />}
+                  <span>{triggerShape.expandedNodeIds ? 'Collapse' : 'Expand'}</span>
+                </button>
+              </CustomTooltip>
+            )}
+
+            {/* Add Subtask - only for tasks without expanded nodes */}
+            {triggerShape.type === ShapeType.TASK && !triggerShape.expandedNodeIds && onAddSubtask && (
+              <CustomTooltip content="Add a new subtask">
+                <button
+                  onClick={() => {
+                    onAddSubtask(triggerShape.id);
+                    onClose();
+                  }}
+                  className="flex items-center gap-2 px-3 py-2 text-sm hover:bg-slate-700/50 rounded text-slate-300 hover:text-white transition-colors w-full text-left"
+                >
+                  <Plus size={16} />
+                  <span>Add Subtask</span>
+                </button>
+              </CustomTooltip>
+            )}
+
+            {/* Clear All Subtasks - only if subtasks exist */}
+            {triggerShape.subtasks && triggerShape.subtasks.length > 0 && onClearAllSubtasks && (
+              <CustomTooltip content="Remove all subtasks">
+                <button
+                  onClick={() => {
+                    onClearAllSubtasks();
+                    onClose();
+                  }}
+                  className="flex items-center gap-2 px-3 py-2 text-sm hover:bg-red-500/20 rounded text-slate-300 hover:text-red-400 transition-colors w-full text-left"
+                >
+                  <Trash2 size={16} />
+                  <span>Clear All Subtasks</span>
+                </button>
+              </CustomTooltip>
+            )}
+          </>
+        )}
 
         {/* Separator and AI Actions */}
         <div className="h-px bg-slate-700/50 my-1" />

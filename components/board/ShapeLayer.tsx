@@ -170,6 +170,12 @@ export const ShapeLayer: React.FC<ShapeLayerProps> = ({
     onUpdateShapes(shapes.map(s => s.id === shapeId ? { ...shape, subtasks: updatedSubtasks } : s));
   };
 
+  const clearAllSubtasks = (shapeId: string) => {
+    const shape = shapes.find(s => s.id === shapeId);
+    if(!shape) return;
+    onUpdateShapes(shapes.map(s => s.id === shapeId ? { ...shape, subtasks: [] } : s));
+  };
+
 
 
   const getShapeStyle = (shape: Shape, isSelected: boolean) => {
@@ -526,6 +532,10 @@ export const ShapeLayer: React.FC<ShapeLayerProps> = ({
             onGroup={onGroup}
             onUngroup={onUngroup}
             onAIActions={() => setShowAiModal(true)}
+            onExpandSubtasks={onExpandSubtasks}
+            onCollapseSubtasks={onCollapseSubtasks}
+            onAddSubtask={addSubtask}
+            onClearAllSubtasks={() => clearAllSubtasks(menuShape.id)}
           />
         );
       })()}
