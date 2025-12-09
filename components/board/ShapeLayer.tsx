@@ -323,6 +323,65 @@ export const ShapeLayer: React.FC<ShapeLayerProps> = ({
                              </div>
                          )}
                      </div>
+                 ) : shape.type === ShapeType.NOTE ? (
+                     <div className="flex flex-col h-full">
+                         {/* Header */}
+                         <div className="p-4 pb-2 flex items-start gap-3 shrink-0">
+                             <div className="p-2 rounded-xl bg-slate-700/50 text-slate-400">
+                                 <Icon size={20} />
+                             </div>
+                             <div className="flex-1 min-w-0">
+                                 {isEditing && editingId === shape.id ? (
+                                     <textarea
+                                         ref={textAreaRef}
+                                         autoFocus
+                                         className="w-full bg-transparent resize-none outline-none text-slate-200 font-semibold leading-snug"
+                                         value={shape.text}
+                                         onChange={(e) => setShapesDirectly(shapes.map(s => s.id === shape.id ? { ...s, text: e.target.value } : s))}
+                                         onBlur={() => { setIsEditing(false); setEditingId(null); onUpdateShapes(shapes); }}
+                                         onKeyDown={(e) => e.stopPropagation()}
+                                         placeholder="Type something..."
+                                     />
+                                 ) : (
+                                     <div className="text-slate-200 font-semibold leading-snug whitespace-pre-wrap break-words">
+                                         {shape.text?.split('\n')[0]?.trim() || 'Untitled Note'}
+                                     </div>
+                                 )}
+                             </div>
+                         </div>
+
+                         {/* Content Preview */}
+                         <div className="px-4 pb-4 flex-1 overflow-hidden">
+                             {(() => {
+                                 const fullText = shape.text || '';
+                                 const lines = fullText.split('\n');
+                                 const titleLine = lines[0] || '';
+                                 const contentLines = lines.slice(1);
+
+                                 // Calculate how many lines to show based on shape height
+                                 const availableHeight = shape.height - 120; // Header height approx
+                                 const lineHeight = 20; // Approximate line height in pixels
+                                 const maxLines = Math.max(1, Math.floor(availableHeight / lineHeight));
+
+                                 // Include title + content preview
+                                 const previewLines = lines.length > 1 ? lines.slice(1, 1 + maxLines) : [];
+                                 const previewText = previewLines.join('\n').trim();
+
+                                 return previewText ? (
+                                     <div className="text-slate-400 text-sm leading-relaxed overflow-hidden">
+                                         <SimpleMarkdown text={previewText} />
+                                         {contentLines.length > maxLines && (
+                                             <span className="text-slate-500 text-xs">...</span>
+                                         )}
+                                     </div>
+                                 ) : (
+                                     <div className="text-slate-500 text-sm italic">
+                                         Double-click to edit...
+                                     </div>
+                                 );
+                             })()}
+                         </div>
+                     </div>
                  ) : !isRect && (
                     <div className="flex flex-col h-full">
                         {/* Header */}
