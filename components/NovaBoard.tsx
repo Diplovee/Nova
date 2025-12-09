@@ -575,7 +575,7 @@ export const NovaBoard: React.FC<NovaBoardProps> = ({
     if (activeTool === 'HAND') return;
     if (isCreationTool(activeTool)) return;
     if (activeTool === ShapeType.VOICE) return;
-    
+
     if (shape.locked && activeTool !== 'SELECT') return;
 
     e.stopPropagation();
@@ -587,14 +587,14 @@ export const NovaBoard: React.FC<NovaBoardProps> = ({
       } else if (connectionDraft.sourceId !== shape.id) {
         const sourceShape = shapes.find(s => s.id === connectionDraft.sourceId);
         if (sourceShape && !sourceShape.connections.some(c => c.targetId === shape.id)) {
-          const updatedSource: Shape = { 
-              ...sourceShape, 
-              connections: [...sourceShape.connections, { 
-                  targetId: shape.id, 
-                  sourceSide: connectionDraft.sourceSide, 
+          const updatedSource: Shape = {
+              ...sourceShape,
+              connections: [...sourceShape.connections, {
+                  targetId: shape.id,
+                  sourceSide: connectionDraft.sourceSide,
                   targetSide: 'left',
                   style: defaultConnectionStyle
-              }] 
+              }]
           };
           onUpdateShapes(shapes.map(s => s.id === connectionDraft.sourceId ? updatedSource : s));
         }
@@ -607,13 +607,13 @@ export const NovaBoard: React.FC<NovaBoardProps> = ({
     // --- Group Selection Logic ---
     const targetGroupId = shape.groupId;
     let shapesToSelect = [shape.id];
-    
+
     if (targetGroupId) {
         shapesToSelect = shapes.filter(s => s.groupId === targetGroupId).map(s => s.id);
     }
 
     let newSelected = new Set(selectedIds);
-    
+
     if (e.shiftKey) {
         // If clicking a group member with shift, toggle the whole group
         const allAlreadySelected = shapesToSelect.every(id => newSelected.has(id));
@@ -633,7 +633,7 @@ export const NovaBoard: React.FC<NovaBoardProps> = ({
             shapesToSelect.forEach(id => newSelected.add(id));
         }
     }
-    
+
     setSelectedIds(newSelected);
     setSelectedConnection(null);
     if (!shape.locked) setIsDragging(true);
@@ -649,7 +649,7 @@ export const NovaBoard: React.FC<NovaBoardProps> = ({
     });
     setInitialShapeStates(initStates);
 
-    setDragStart({ x: e.clientX, y: e.clientY }); 
+    setDragStart({ x: e.clientX, y: e.clientY });
   };
 
   const handleConnectionStart = (e: React.MouseEvent, shapeId: string, side: Side) => {

@@ -208,14 +208,14 @@ export const ShapeLayer: React.FC<ShapeLayerProps> = ({
             <div
               key={shape.id}
               className={`absolute group transition-shadow duration-200 select-none ${
-                  isSelected ? 'z-[90]' : 'z-10'
+                  isSelected && !isRect ? 'z-[90]' : 'z-10'
               }`}
               style={{
                 left: shape.x,
                 top: shape.y,
                 width: shape.width,
                 height: shape.height,
-                zIndex: isSelected ? 90 : (10 + index),
+                zIndex: isSelected && !isRect ? 90 : index,
                 opacity: shape.opacity ?? 1
               }}
               onMouseDown={(e) => onShapeMouseDown(e, shape)}
@@ -309,7 +309,13 @@ export const ShapeLayer: React.FC<ShapeLayerProps> = ({
                  {isImageShape ? (
                      <div className="w-full h-full flex items-center justify-center overflow-hidden">
                          {shape.attachments && shape.attachments[0] ? (
-                             <img src={shape.attachments[0].url} alt={shape.attachments[0].name} className="w-full h-full object-contain" />
+                             <img
+                                 src={shape.attachments[0].url}
+                                 alt={shape.attachments[0].name}
+                                 className="w-full h-full object-contain"
+                                 draggable={false}
+                                 onDragStart={(e) => e.preventDefault()}
+                             />
                          ) : (
                              <div className="text-slate-500 flex flex-col items-center">
                                  <ImageIcon size={32} />
