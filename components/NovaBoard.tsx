@@ -879,6 +879,9 @@ export const NovaBoard: React.FC<NovaBoardProps> = ({
     };
   }, [handleMouseMove, handleMouseUp]);
 
+  // --- Clipboard state ---
+  const [clipboard, setClipboard] = useState<Shape[]>([]);
+
   // --- Keyboard Shortcuts ---
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -902,11 +905,46 @@ export const NovaBoard: React.FC<NovaBoardProps> = ({
         }
         if ((e.ctrlKey || e.metaKey) && e.key === 'z') {
             e.preventDefault();
-            e.shiftKey ? onRedo() : onUndo();
+            if (e.shiftKey) {
+                onRedo();
+            } else {
+                onUndo();
+            }
+        }
+        if ((e.ctrlKey || e.metaKey) && e.key === 'y') {
+            e.preventDefault();
+            onRedo();
         }
         if ((e.ctrlKey || e.metaKey) && e.key === 'd') {
             e.preventDefault();
             duplicateShape();
+        }
+        if ((e.ctrlKey || e.metaKey) && e.key === 'c' && !isEditing) {
+            e.preventDefault();
+            // Copy selected shapes
+            const selectedShapes = shapes.filter(s => selectedIds.has(s.id));
+            setClipboard(selectedShapes.map(s => ({
+                ...s,
+                id: generateId(), // Give new IDs to copies
+                x: s.x + 20, // Offset copies slightly
+                y: s.y + 20,
+                connections: [] // Don't copy connections
+            })));
+        }
+        if ((e.ctrlKey || e.metaKey) && e.key === 'v' && !isEditing) {
+            e.preventDefault();
+            if (clipboard.length > 0) {
+                // Paste copied shapes
+                const pastedShapes = clipboard.map(s => ({
+                    ...s,
+                    id: generateId(),
+                    x: s.x + Math.random() * 50 - 25, // Random offset
+                    y: s.y + Math.random() * 50 - 25,
+                    connections: []
+                }));
+                onUpdateShapes([...shapes, ...pastedShapes]);
+                setSelectedIds(new Set(pastedShapes.map(s => s.id)));
+            }
         }
         if ((e.ctrlKey || e.metaKey) && e.key === 'g') {
             e.preventDefault();
@@ -916,15 +954,40 @@ export const NovaBoard: React.FC<NovaBoardProps> = ({
                 handleGroup();
             }
         }
+        if ((e.ctrlKey || e.metaKey) && e.key === 'l') {
+            e.preventDefault();
+            if (selectedIds.size > 0) {
+                toggleLock();
+            }
+        }
+        if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
+            e.preventDefault();
+            bringToFront();
+        }
+        if ((e.ctrlKey || e.metaKey) && e.key === 'b') {
+            e.preventDefault();
+            sendToBack();
+        }
         if (e.code === 'Space' && !isEditing) {
+            e.preventDefault();
             if (activeTool !== 'HAND') setActiveTool('HAND');
         }
     };
+
+    const handleKeyUp = (e: KeyboardEvent) => {
+        if (e.code === 'Space' && !isEditing) {
+            e.preventDefault();
+            setActiveTool('SELECT');
+        }
+    };
+
     window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('keyup', handleKeyUp);
     return () => {
         window.removeEventListener('keydown', handleKeyDown);
+        window.removeEventListener('keyup', handleKeyUp);
     };
-  }, [selectedIds, selectedConnection, shapes, isEditing, onUpdateShapes, onUndo, onRedo, activeTool, isDragging, isResizing, onRedo, onUndo, duplicateShape, handleUngroup, handleGroup, deleteConnection, deleteSelected, setSelectedIds, setSelectedConnection]);
+  }, [selectedIds, selectedConnection, shapes, isEditing, onUpdateShapes, onUndo, onRedo, activeTool, isDragging, isResizing, onRedo, onUndo, duplicateShape, handleUngroup, handleGroup, deleteConnection, deleteSelected, setSelectedIds, setSelectedConnection, clipboard, toggleLock, bringToFront, sendToBack]);
 
   // --- AI Logic ---
   const handleAIBrainstorm = async (mode: 'subtasks' | 'nodes' | 'refine' | 'custom' | 'note' | 'sheet', customPrompt?: string) => {

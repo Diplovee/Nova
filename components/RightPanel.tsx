@@ -1,5 +1,6 @@
 import React, { useState, useRef, useCallback } from 'react';
 import { ToolButton } from './ui/ToolButton';
+import { CustomTooltip } from './ui/CustomTooltip';
 import { ShapeType, Shape, ShapeStyling } from '../types';
 import { Maximize2, Minimize2, Scan, Crosshair, ZoomIn, ZoomOut, Palette, Square, SquareDashed, CircleDashed, FileText, Table, Database, Copy, Lock, Unlock, Layers, Group, Ungroup, Network, Shrink, ImageIcon, Mic, Sparkles, Plus, MoreVertical, Lightbulb, Zap } from 'lucide-react';
 
@@ -463,94 +464,103 @@ export const RightPanel: React.FC<RightPanelProps> = ({
               {/* Quick Actions */}
               <div className="grid grid-cols-3 gap-1 mb-4">
               {duplicateShape && (
-                <button
-                  onClick={duplicateShape}
-                  className="flex-shrink-0 p-2 bg-slate-800/50 hover:bg-slate-700 rounded text-xs text-center transition-colors group"
-                  title="Duplicate"
-                >
-                  <Copy size={14} className="mx-auto mb-1 text-slate-400 group-hover:text-white" />
-                  <span className="text-[10px] text-slate-400 group-hover:text-white">Copy</span>
-                </button>
+                <CustomTooltip content="Duplicate selected shape(s)" shortcut="Ctrl+D">
+                  <button
+                    onClick={duplicateShape}
+                    className="flex-shrink-0 p-2 bg-slate-800/50 hover:bg-slate-700 rounded text-xs text-center transition-colors group"
+                  >
+                    <Copy size={14} className="mx-auto mb-1 text-slate-400 group-hover:text-white" />
+                    <span className="text-[10px] text-slate-400 group-hover:text-white">Copy</span>
+                  </button>
+                </CustomTooltip>
               )}
               {selectedShape?.locked !== undefined && toggleLock && (
-                <button
-                  onClick={toggleLock}
-                  className={`flex-shrink-0 p-2 bg-slate-800/50 hover:bg-slate-700 rounded text-xs text-center transition-colors group ${selectedShape.locked ? 'bg-red-500/10' : ''}`}
-                  title={selectedShape.locked ? "Unlock" : "Lock"}
-                >
-                  {selectedShape.locked ? <Lock size={14} className="mx-auto mb-1 text-red-400 group-hover:text-red-300" /> : <Unlock size={14} className="mx-auto mb-1 text-slate-400 group-hover:text-white" />}
-                  <span className="text-[10px] text-slate-400 group-hover:text-white">{selectedShape.locked ? 'Unlock' : 'Lock'}</span>
-                </button>
+                <CustomTooltip content={selectedShape.locked ? "Unlock shape" : "Lock shape"} shortcut="Ctrl+L">
+                  <button
+                    onClick={toggleLock}
+                    className={`flex-shrink-0 p-2 bg-slate-800/50 hover:bg-slate-700 rounded text-xs text-center transition-colors group ${selectedShape.locked ? 'bg-red-500/10' : ''}`}
+                  >
+                    {selectedShape.locked ? <Lock size={14} className="mx-auto mb-1 text-red-400 group-hover:text-red-300" /> : <Unlock size={14} className="mx-auto mb-1 text-slate-400 group-hover:text-white" />}
+                    <span className="text-[10px] text-slate-400 group-hover:text-white">{selectedShape.locked ? 'Unlock' : 'Lock'}</span>
+                  </button>
+                </CustomTooltip>
               )}
               {bringToFront && (
-                <button
-                  onClick={bringToFront}
-                  className="flex-shrink-0 p-2 bg-slate-800/50 hover:bg-slate-700 rounded text-xs text-center transition-colors group"
-                  title="Bring to Front"
-                >
-                  <Layers size={14} className="mx-auto mb-1 text-slate-400 group-hover:text-white" />
-                  <span className="text-[10px] text-slate-400 group-hover:text-white">Front</span>
-                </button>
+                <CustomTooltip content="Bring to front" shortcut="Ctrl+F">
+                  <button
+                    onClick={bringToFront}
+                    className="flex-shrink-0 p-2 bg-slate-800/50 hover:bg-slate-700 rounded text-xs text-center transition-colors group"
+                  >
+                    <Layers size={14} className="mx-auto mb-1 text-slate-400 group-hover:text-white" />
+                    <span className="text-[10px] text-slate-400 group-hover:text-white">Front</span>
+                  </button>
+                </CustomTooltip>
               )}
               {sendToBack && (
-                <button
-                  onClick={sendToBack}
-                  className="flex-shrink-0 p-2 bg-slate-800/50 hover:bg-slate-700 rounded text-xs text-center transition-colors group"
-                  title="Send to Back"
-                >
-                  <Layers size={14} className="mx-auto mb-1 text-slate-400 group-hover:text-white opacity-50" />
-                  <span className="text-[10px] text-slate-400 group-hover:text-white">Back</span>
-                </button>
+                <CustomTooltip content="Send to back" shortcut="Ctrl+B">
+                  <button
+                    onClick={sendToBack}
+                    className="flex-shrink-0 p-2 bg-slate-800/50 hover:bg-slate-700 rounded text-xs text-center transition-colors group"
+                  >
+                    <Layers size={14} className="mx-auto mb-1 text-slate-400 group-hover:text-white opacity-50" />
+                    <span className="text-[10px] text-slate-400 group-hover:text-white">Back</span>
+                  </button>
+                </CustomTooltip>
               )}
               {selectedIds.size > 1 && onGroup && (
-                <button
-                  onClick={onGroup}
-                  className="flex-shrink-0 p-2 bg-slate-800/50 hover:bg-slate-700 rounded text-xs text-center transition-colors group"
-                  title="Group Shapes"
-                >
-                  <Group size={14} className="mx-auto mb-1 text-slate-400 group-hover:text-white" />
-                  <span className="text-[10px] text-slate-400 group-hover:text-white">Group</span>
-                </button>
+                <CustomTooltip content="Group selected shapes" shortcut="Ctrl+G">
+                  <button
+                    onClick={onGroup}
+                    className="flex-shrink-0 p-2 bg-slate-800/50 hover:bg-slate-700 rounded text-xs text-center transition-colors group"
+                  >
+                    <Group size={14} className="mx-auto mb-1 text-slate-400 group-hover:text-white" />
+                    <span className="text-[10px] text-slate-400 group-hover:text-white">Group</span>
+                  </button>
+                </CustomTooltip>
               )}
               {selectedShape?.groupId && selectedIds.size === 1 && onUngroup && (
-                <button
-                  onClick={onUngroup}
-                  className="flex-shrink-0 p-2 bg-slate-800/50 hover:bg-slate-700 rounded text-xs text-center transition-colors group"
-                  title="Ungroup Shapes"
-                >
-                  <Ungroup size={14} className="mx-auto mb-1 text-slate-400 group-hover:text-white" />
-                  <span className="text-[10px] text-slate-400 group-hover:text-white">Ungroup</span>
-                </button>
+                <CustomTooltip content="Ungroup shapes" shortcut="Ctrl+Shift+G">
+                  <button
+                    onClick={onUngroup}
+                    className="flex-shrink-0 p-2 bg-slate-800/50 hover:bg-slate-700 rounded text-xs text-center transition-colors group"
+                  >
+                    <Ungroup size={14} className="mx-auto mb-1 text-slate-400 group-hover:text-white" />
+                    <span className="text-[10px] text-slate-400 group-hover:text-white">Ungroup</span>
+                  </button>
+                </CustomTooltip>
               )}
               {(selectedShape?.subtasks?.length || selectedShape?.expandedNodeIds) && (
-                <button
-                  onClick={() => selectedShape.expandedNodeIds ? onCollapseSubtasks?.(selectedShape.id) : onExpandSubtasks?.(selectedShape.id)}
-                  className="flex-shrink-0 p-2 bg-slate-800/50 hover:bg-slate-700 rounded text-xs text-center transition-colors group"
-                  title={selectedShape.expandedNodeIds ? "Collapse Nodes" : "Expand to Nodes"}
-                >
-                  {selectedShape.expandedNodeIds ? <Shrink size={14} className="mx-auto mb-1 text-slate-400 group-hover:text-white" /> : <Network size={14} className="mx-auto mb-1 text-slate-400 group-hover:text-white" />}
-                  <span className="text-[10px] text-slate-400 group-hover:text-white">{selectedShape.expandedNodeIds ? 'Collapse' : 'Expand'}</span>
-                </button>
+                <CustomTooltip content={selectedShape.expandedNodeIds ? "Collapse expanded nodes" : "Expand to subtasks on canvas"}>
+                  <button
+                    onClick={() => selectedShape.expandedNodeIds ? onCollapseSubtasks?.(selectedShape.id) : onExpandSubtasks?.(selectedShape.id)}
+                    className="flex-shrink-0 p-2 bg-slate-800/50 hover:bg-slate-700 rounded text-xs text-center transition-colors group"
+                  >
+                    {selectedShape.expandedNodeIds ? <Shrink size={14} className="mx-auto mb-1 text-slate-400 group-hover:text-white" /> : <Network size={14} className="mx-auto mb-1 text-slate-400 group-hover:text-white" />}
+                    <span className="text-[10px] text-slate-400 group-hover:text-white">{selectedShape.expandedNodeIds ? 'Collapse' : 'Expand'}</span>
+                  </button>
+                </CustomTooltip>
               )}
               {selectedShape?.type === ShapeType.TASK && !selectedShape?.expandedNodeIds && addSubtask && (
-                <button
-                  onClick={() => addSubtask(selectedShape.id)}
-                  className="flex-shrink-0 p-2 bg-slate-800/50 hover:bg-slate-700 rounded text-xs text-center transition-colors group"
-                  title="Add Subtask"
-                >
-                  <Plus size={14} className="mx-auto mb-1 text-slate-400 group-hover:text-white" />
-                  <span className="text-[10px] text-slate-400 group-hover:text-white">Subtask</span>
-                </button>
+                <CustomTooltip content="Add a new subtask">
+                  <button
+                    onClick={() => addSubtask(selectedShape.id)}
+                    className="flex-shrink-0 p-2 bg-slate-800/50 hover:bg-slate-700 rounded text-xs text-center transition-colors group"
+                  >
+                    <Plus size={14} className="mx-auto mb-1 text-slate-400 group-hover:text-white" />
+                    <span className="text-[10px] text-slate-400 group-hover:text-white">Subtask</span>
+                  </button>
+                </CustomTooltip>
               )}
               {triggerFileUpload && (
-                <button
-                  onClick={triggerFileUpload}
-                  className="flex-shrink-0 p-2 bg-slate-800/50 hover:bg-slate-700 rounded text-xs text-center transition-colors group"
-                  title="Attach Media"
-                >
-                  <ImageIcon size={14} className="mx-auto mb-1 text-slate-400 group-hover:text-white" />
-                  <span className="text-[10px] text-slate-400 group-hover:text-white">Attach</span>
-                </button>
+                <CustomTooltip content="Attach image or audio to shape">
+                  <button
+                    onClick={triggerFileUpload}
+                    className="flex-shrink-0 p-2 bg-slate-800/50 hover:bg-slate-700 rounded text-xs text-center transition-colors group"
+                  >
+                    <ImageIcon size={14} className="mx-auto mb-1 text-slate-400 group-hover:text-white" />
+                    <span className="text-[10px] text-slate-400 group-hover:text-white">Attach</span>
+                  </button>
+                </CustomTooltip>
               )}
             </div>
 
@@ -562,38 +572,42 @@ export const RightPanel: React.FC<RightPanelProps> = ({
                   AI Actions
                 </h4>
                 <div className="grid grid-cols-2 gap-1">
-                  <button
-                    onClick={() => handleAIBrainstorm('subtasks')}
-                    className="flex-shrink-0 p-2 bg-slate-800/50 hover:bg-nova-primary/20 hover:border-nova-primary/30 border border-transparent rounded text-xs text-center transition-colors group"
-                    title="Break Down into Subtasks"
-                  >
-                    <FileText size={12} className="mx-auto mb-1 text-slate-400 group-hover:text-nova-primary" />
-                    <span className="text-[9px] text-slate-400 group-hover:text-nova-primary">Break Down</span>
-                  </button>
-                  <button
-                    onClick={() => handleAIBrainstorm('nodes')}
-                    className="flex-shrink-0 p-2 bg-slate-800/50 hover:bg-nova-primary/20 hover:border-nova-primary/30 border border-transparent rounded text-xs text-center transition-colors group"
-                    title="Brainstorm Ideas"
-                  >
-                    <Lightbulb size={12} className="mx-auto mb-1 text-slate-400 group-hover:text-nova-primary" />
-                    <span className="text-[9px] text-slate-400 group-hover:text-nova-primary">Brainstorm</span>
-                  </button>
-                  <button
-                    onClick={() => handleAIBrainstorm('note')}
-                    className="flex-shrink-0 p-2 bg-slate-800/50 hover:bg-nova-primary/20 hover:border-nova-primary/30 border border-transparent rounded text-xs text-center transition-colors group"
-                    title="Create Note"
-                  >
-                    <FileText size={12} className="mx-auto mb-1 text-slate-400 group-hover:text-nova-primary" />
-                    <span className="text-[9px] text-slate-400 group-hover:text-nova-primary">Draft Note</span>
-                  </button>
-                  <button
-                    onClick={() => handleAIBrainstorm('sheet')}
-                    className="flex-shrink-0 p-2 bg-slate-800/50 hover:bg-nova-primary/20 hover:border-nova-primary/30 border border-transparent rounded text-xs text-center transition-colors group"
-                    title="Create Sheet"
-                  >
-                    <Table size={12} className="mx-auto mb-1 text-slate-400 group-hover:text-nova-primary" />
-                    <span className="text-[9px] text-slate-400 group-hover:text-nova-primary">Create Sheet</span>
-                  </button>
+                  <CustomTooltip content="Generate subtasks from this content">
+                    <button
+                      onClick={() => handleAIBrainstorm('subtasks')}
+                      className="flex-shrink-0 p-2 bg-slate-800/50 hover:bg-nova-primary/20 hover:border-nova-primary/30 border border-transparent rounded text-xs text-center transition-colors group"
+                    >
+                      <FileText size={12} className="mx-auto mb-1 text-slate-400 group-hover:text-nova-primary" />
+                      <span className="text-[9px] text-slate-400 group-hover:text-nova-primary">Break Down</span>
+                    </button>
+                  </CustomTooltip>
+                  <CustomTooltip content="Generate related idea nodes">
+                    <button
+                      onClick={() => handleAIBrainstorm('nodes')}
+                      className="flex-shrink-0 p-2 bg-slate-800/50 hover:bg-nova-primary/20 hover:border-nova-primary/30 border border-transparent rounded text-xs text-center transition-colors group"
+                    >
+                      <Lightbulb size={12} className="mx-auto mb-1 text-slate-400 group-hover:text-nova-primary" />
+                      <span className="text-[9px] text-slate-400 group-hover:text-nova-primary">Brainstorm</span>
+                    </button>
+                  </CustomTooltip>
+                  <CustomTooltip content="Draft a note with AI suggestions">
+                    <button
+                      onClick={() => handleAIBrainstorm('note')}
+                      className="flex-shrink-0 p-2 bg-slate-800/50 hover:bg-nova-primary/20 hover:border-nova-primary/30 border border-transparent rounded text-xs text-center transition-colors group"
+                    >
+                      <FileText size={12} className="mx-auto mb-1 text-slate-400 group-hover:text-nova-primary" />
+                      <span className="text-[9px] text-slate-400 group-hover:text-nova-primary">Draft Note</span>
+                    </button>
+                  </CustomTooltip>
+                  <CustomTooltip content="Create a data sheet with AI">
+                    <button
+                      onClick={() => handleAIBrainstorm('sheet')}
+                      className="flex-shrink-0 p-2 bg-slate-800/50 hover:bg-nova-primary/20 hover:border-nova-primary/30 border border-transparent rounded text-xs text-center transition-colors group"
+                    >
+                      <Table size={12} className="mx-auto mb-1 text-slate-400 group-hover:text-nova-primary" />
+                      <span className="text-[9px] text-slate-400 group-hover:text-nova-primary">Create Sheet</span>
+                    </button>
+                  </CustomTooltip>
                 </div>
               </div>
             )}

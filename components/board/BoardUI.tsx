@@ -1,5 +1,6 @@
 import React from 'react';
 import { ToolButton } from '../ui/ToolButton';
+import { CustomTooltip } from '../ui/CustomTooltip';
 import { ShapeType, Shape, ConnectionStyle, Point, Side, ShapeStyling, Connection } from '../../types';
 import {
   LayoutTemplate, Lightbulb, Square, Type, Image as ImageIcon, Mic, Link as LinkIcon, Minus, MoreHorizontal, MoreVertical, GitCommitHorizontal, FileText, Table, Database, Maximize2, Minimize2, Sparkles, XCircle, Loader2, ArrowUp, ArrowRight, ArrowDown, ArrowLeft, Trash2, MousePointer2, Hand, Undo2, Redo2
@@ -81,22 +82,44 @@ export const BoardUI: React.FC<BoardUIProps> = ({
           transform: 'none'
         }}>
          <div className="flex items-center gap-1 pr-2 border-r border-slate-700/50">
-             <ToolButton icon={Undo2} title="Undo" isActive={false} onClick={onUndo} disabled={!canUndo} />
-             <ToolButton icon={Redo2} title="Redo" isActive={false} onClick={onRedo} disabled={!canRedo} />
+             <CustomTooltip content="Undo last action" shortcut="Ctrl+Z">
+               <ToolButton icon={Undo2} title="Undo" isActive={false} onClick={onUndo} disabled={!canUndo} />
+             </CustomTooltip>
+             <CustomTooltip content="Redo last undone action" shortcut="Ctrl+Y">
+               <ToolButton icon={Redo2} title="Redo" isActive={false} onClick={onRedo} disabled={!canRedo} />
+             </CustomTooltip>
          </div>
          <div className="flex items-center gap-1 pr-2 border-r border-slate-700/50">
-             <ToolButton icon={MousePointer2} title="Select" isActive={activeTool === 'SELECT'} onClick={() => setActiveTool('SELECT')} />
-             <ToolButton icon={Hand} title="Pan" isActive={activeTool === 'HAND'} onClick={() => setActiveTool('HAND')} />
+             <CustomTooltip content="Select and move shapes">
+               <ToolButton icon={MousePointer2} title="Select" isActive={activeTool === 'SELECT'} onClick={() => setActiveTool('SELECT')} />
+             </CustomTooltip>
+             <CustomTooltip content="Pan the board" shortcut="Space">
+               <ToolButton icon={Hand} title="Pan" isActive={activeTool === 'HAND'} onClick={() => setActiveTool('HAND')} />
+             </CustomTooltip>
          </div>
          <div className="flex items-center gap-1 pr-2 border-r border-slate-700/50">
-             <ToolButton icon={LayoutTemplate} title="Task" isActive={activeTool === ShapeType.TASK} onClick={() => setActiveTool(ShapeType.TASK)} />
-             <ToolButton icon={Lightbulb} title="Idea" isActive={activeTool === ShapeType.IDEA} onClick={() => setActiveTool(ShapeType.IDEA)} />
-             <ToolButton icon={Square} title="Rectangle" isActive={activeTool === ShapeType.RECTANGLE} onClick={() => setActiveTool(ShapeType.RECTANGLE)} />
-             <ToolButton icon={Type} title="Text" isActive={activeTool === ShapeType.TEXT} onClick={() => setActiveTool(ShapeType.TEXT)} />
-             <ToolButton icon={ImageIcon} title="Image" isActive={activeTool === ShapeType.IMAGE} onClick={triggerImageToolUpload} />
-             <ToolButton icon={Mic} title="Voice Note" isActive={activeTool === ShapeType.VOICE} onClick={() => setActiveTool(ShapeType.VOICE)} />
+             <CustomTooltip content="Create task shapes">
+               <ToolButton icon={LayoutTemplate} title="Task" isActive={activeTool === ShapeType.TASK} onClick={() => setActiveTool(ShapeType.TASK)} />
+             </CustomTooltip>
+             <CustomTooltip content="Create idea shapes">
+               <ToolButton icon={Lightbulb} title="Idea" isActive={activeTool === ShapeType.IDEA} onClick={() => setActiveTool(ShapeType.IDEA)} />
+             </CustomTooltip>
+             <CustomTooltip content="Create rectangle shapes">
+               <ToolButton icon={Square} title="Rectangle" isActive={activeTool === ShapeType.RECTANGLE} onClick={() => setActiveTool(ShapeType.RECTANGLE)} />
+             </CustomTooltip>
+             <CustomTooltip content="Create text shapes">
+               <ToolButton icon={Type} title="Text" isActive={activeTool === ShapeType.TEXT} onClick={() => setActiveTool(ShapeType.TEXT)} />
+             </CustomTooltip>
+             <CustomTooltip content="Upload and add images">
+               <ToolButton icon={ImageIcon} title="Image" isActive={activeTool === ShapeType.IMAGE} onClick={triggerImageToolUpload} />
+             </CustomTooltip>
+             <CustomTooltip content="Record voice notes">
+               <ToolButton icon={Mic} title="Voice Note" isActive={activeTool === ShapeType.VOICE} onClick={() => setActiveTool(ShapeType.VOICE)} />
+             </CustomTooltip>
              <div className="relative flex items-center">
-                <ToolButton icon={LinkIcon} title="Connect" isActive={activeTool === 'CONNECTOR'} onClick={() => setActiveTool('CONNECTOR')} />
+               <CustomTooltip content="Connect shapes with arrows">
+                 <ToolButton icon={LinkIcon} title="Connect" isActive={activeTool === 'CONNECTOR'} onClick={() => setActiveTool('CONNECTOR')} />
+               </CustomTooltip>
                 {activeTool === 'CONNECTOR' && (
                     <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 bg-nova-card border border-slate-700 p-1.5 rounded-lg flex gap-1 shadow-xl animate-in fade-in slide-in-from-bottom-2">
                         <button onClick={() => setDefaultConnectionStyle('solid')} className={`p-1.5 rounded hover:bg-slate-700 ${defaultConnectionStyle === 'solid' ? 'bg-nova-primary text-black' : 'text-slate-400'}`} title="Solid"><Minus size={14}/></button>
