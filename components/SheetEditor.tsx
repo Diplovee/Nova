@@ -47,7 +47,7 @@ export const SheetEditor: React.FC<SheetEditorProps> = ({ shape, onClose, onUpda
   };
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-[250] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-in fade-in duration-200">
       <div className="w-full max-w-6xl h-[85vh] bg-[#1E1E28] rounded-2xl shadow-2xl border border-slate-700 flex flex-col overflow-hidden">
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-slate-700 bg-slate-800/50">

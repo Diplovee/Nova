@@ -19,16 +19,22 @@ interface NovaBoardProps {
   canUndo: boolean;
   canRedo: boolean;
   onOpenEditor: (shape: Shape) => void;
+  isRightPanelCollapsed: boolean;
+  toggleRightPanel: () => void;
+  toggleSidebar: () => void;
 }
 
-export const NovaBoard: React.FC<NovaBoardProps> = ({ 
-  shapes, 
+export const NovaBoard: React.FC<NovaBoardProps> = ({
+  shapes,
   onUpdateShapes,
   onUndo,
   onRedo,
   canUndo,
   canRedo,
-  onOpenEditor
+  onOpenEditor,
+  isRightPanelCollapsed,
+  toggleRightPanel,
+  toggleSidebar
 }) => {
   // --- View State ---
   const [scale, setScale] = useState(1);
@@ -1235,6 +1241,8 @@ export const NovaBoard: React.FC<NovaBoardProps> = ({
         defaultConnectionStyle={defaultConnectionStyle}
         setDefaultConnectionStyle={setDefaultConnectionStyle}
         triggerImageToolUpload={() => imageToolInputRef.current?.click()}
+        toggleSidebar={toggleSidebar}
+        toggleRightPanel={toggleRightPanel}
         selectedConnection={selectedConnection}
         selectedIds={selectedIds}
         shapes={shapes}
@@ -1251,30 +1259,32 @@ export const NovaBoard: React.FC<NovaBoardProps> = ({
         canRedo={canRedo}
       />
 
-      <RightPanel
-        scale={scale}
-        handleFitToScreen={handleFitToScreen}
-        handleResetView={handleResetView}
-        handleZoomIn={handleZoomIn}
-        handleZoomOut={handleZoomOut}
-        selectedIds={selectedIds}
-        shapes={shapes}
-        updateStyling={updateStyling}
-        setActiveTool={setActiveTool}
-        activeTool={activeTool}
-        duplicateShape={duplicateShape}
-        bringToFront={bringToFront}
-        sendToBack={sendToBack}
-        toggleLock={toggleLock}
-        onGroup={handleGroup}
-        onUngroup={handleUngroup}
-        onExpandSubtasks={handleExpandSubtasks}
-        onCollapseSubtasks={handleCollapseSubtasks}
-        setShowAiModal={setShowAiModal}
-        triggerFileUpload={() => fileInputRef.current?.click()}
-        addSubtask={addSubtask}
-        handleAIBrainstorm={handleAIBrainstorm}
-      />
+      {!isRightPanelCollapsed && (
+        <RightPanel
+          scale={scale}
+          handleFitToScreen={handleFitToScreen}
+          handleResetView={handleResetView}
+          handleZoomIn={handleZoomIn}
+          handleZoomOut={handleZoomOut}
+          selectedIds={selectedIds}
+          shapes={shapes}
+          updateStyling={updateStyling}
+          setActiveTool={setActiveTool}
+          activeTool={activeTool}
+          duplicateShape={duplicateShape}
+          bringToFront={bringToFront}
+          sendToBack={sendToBack}
+          toggleLock={toggleLock}
+          onGroup={handleGroup}
+          onUngroup={handleUngroup}
+          onExpandSubtasks={handleExpandSubtasks}
+          onCollapseSubtasks={handleCollapseSubtasks}
+          setShowAiModal={setShowAiModal}
+          triggerFileUpload={() => fileInputRef.current?.click()}
+          addSubtask={addSubtask}
+          handleAIBrainstorm={handleAIBrainstorm}
+        />
+      )}
 
       {/* Image Preview Modal */}
       {imageModalAttachment && (

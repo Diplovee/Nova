@@ -3,7 +3,7 @@ import { ToolButton } from '../ui/ToolButton';
 import { CustomTooltip } from '../ui/CustomTooltip';
 import { ShapeType, Shape, ConnectionStyle, Point, Side, ShapeStyling, Connection } from '../../types';
 import {
-  LayoutTemplate, Lightbulb, Square, Type, Image as ImageIcon, Mic, Link as LinkIcon, Minus, MoreHorizontal, MoreVertical, GitCommitHorizontal, FileText, Table, Database, Maximize2, Minimize2, Sparkles, XCircle, Loader2, ArrowUp, ArrowRight, ArrowDown, ArrowLeft, Trash2, MousePointer2, Hand, Undo2, Redo2
+  LayoutTemplate, Lightbulb, Square, Type, Image as ImageIcon, Mic, Link as LinkIcon, Minus, MoreHorizontal, MoreVertical, GitCommitHorizontal, FileText, Table, Database, Maximize2, Minimize2, Sparkles, XCircle, Loader2, ArrowUp, ArrowRight, ArrowDown, ArrowLeft, Trash2, MousePointer2, Hand, Undo2, Redo2, PanelLeft, PanelRight
 } from 'lucide-react';
 import { RightPanel } from '../RightPanel';
 
@@ -20,17 +20,21 @@ interface BoardUIProps {
   defaultConnectionStyle: ConnectionStyle;
   setDefaultConnectionStyle: (style: ConnectionStyle) => void;
   triggerImageToolUpload: () => void;
-  
+
+  // Panel Toggles
+  toggleSidebar: () => void;
+  toggleRightPanel: () => void;
+
   // Selection Context
   selectedConnection: { from: string, to: string, midPoint?: Point } | null;
   selectedIds: Set<string>;
   shapes: Shape[];
-  
+
   // Actions
   updateConnection: (targetId: string, updates: Partial<Connection>) => void;
   deleteConnection: () => void;
   updateStyling: (styling: Partial<ShapeStyling>) => void;
-  
+
   // Undo/Redo
   onUndo: () => void;
   onRedo: () => void;
@@ -57,6 +61,8 @@ export const BoardUI: React.FC<BoardUIProps> = ({
   defaultConnectionStyle,
   setDefaultConnectionStyle,
   triggerImageToolUpload,
+  toggleSidebar,
+  toggleRightPanel,
   selectedConnection,
   selectedIds,
   shapes,
@@ -129,6 +135,14 @@ export const BoardUI: React.FC<BoardUIProps> = ({
                     </div>
                 )}
              </div>
+         </div>
+         <div className="flex items-center gap-1">
+             <CustomTooltip content="Toggle left sidebar">
+               <ToolButton icon={PanelLeft} title="Sidebar" isActive={false} onClick={toggleSidebar} />
+             </CustomTooltip>
+             <CustomTooltip content="Toggle right panel">
+               <ToolButton icon={PanelRight} title="Right Panel" isActive={false} onClick={toggleRightPanel} />
+             </CustomTooltip>
          </div>
       </div>
       

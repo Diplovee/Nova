@@ -196,6 +196,7 @@ const DEFAULT_BOARD: Board = {
 const App: React.FC = () => {
   const [currentPage, setCurrentPage] = useState<Page>(Page.DASHBOARD);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true);
+  const [isRightPanelCollapsed, setIsRightPanelCollapsed] = useState(false);
   const [editingItem, setEditingItem] = useState<Shape | null>(null);
 
   // --- Session Management ---
@@ -426,7 +427,7 @@ const App: React.FC = () => {
         );
       case Page.NOVA_BOARD:
         return (
-          <NovaBoard 
+          <NovaBoard
             shapes={shapes}
             onUpdateShapes={handleUpdateShapes}
             onUndo={undo}
@@ -434,6 +435,9 @@ const App: React.FC = () => {
             canUndo={historyIndex > 0}
             canRedo={historyIndex < history.length - 1}
             onOpenEditor={setEditingItem}
+            isRightPanelCollapsed={isRightPanelCollapsed}
+            toggleRightPanel={() => setIsRightPanelCollapsed(!isRightPanelCollapsed)}
+            toggleSidebar={toggleSidebar}
           />
         );
       case Page.TASKS:
