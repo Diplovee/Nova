@@ -51,16 +51,21 @@ export const NoteEditor: React.FC<NoteEditorProps> = ({ shape, onClose, onUpdate
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
 
-  // Calculate pages based on height
+  // Calculate pages based on height and create automatic page breaks
   useEffect(() => {
-    if (textareaRef.current) {
-        // We set height to auto to get full scroll height, then stick it.
+    if (textareaRef.current && !isPreview) {
+        // Temporarily set height to auto to measure content
         textareaRef.current.style.height = 'auto';
-        const height = textareaRef.current.scrollHeight;
-        textareaRef.current.style.height = `${Math.max(PAGE_HEIGHT, height)}px`;
-        
-        const pages = Math.ceil(height / PAGE_HEIGHT);
-        setPageCount(Math.max(1, pages));
+        const scrollHeight = textareaRef.current.scrollHeight || PAGE_HEIGHT;
+
+        // Calculate required pages (A4 height simulation like MS Word)
+        const calculatedPages = Math.max(1, Math.ceil(scrollHeight / PAGE_HEIGHT));
+        const totalHeight = calculatedPages * PAGE_HEIGHT;
+
+        // Set final height to accommodate all pages
+        textareaRef.current.style.height = `${totalHeight}px`;
+
+        setPageCount(calculatedPages);
     }
   }, [content, zoom, isPreview]);
 
@@ -453,20 +458,22 @@ export const NoteEditor: React.FC<NoteEditorProps> = ({ shape, onClose, onUpdate
         </div>
 
         {/* Document Area */}
-        <div 
+        <div
             ref={containerRef}
-            className="flex-1 overflow-y-auto bg-[#1a1a23] relative flex justify-center p-8 cursor-text custom-scrollbar" 
+            className="flex-1 overflow-y-auto bg-[#1a1a23] relative flex justify-center p-8 cursor-text custom-scrollbar"
             onClick={() => !isPreview && textareaRef.current?.focus()}
         >
             {/* Paper Container */}
-            <div 
+            <div
                 className={`w-[800px] bg-[#1E1E28] shadow-[0_0_50px_rgba(0,0,0,0.5)] relative transition-all duration-500 ${isGenerating ? 'shadow-[0_0_30px_rgba(34,211,238,0.15)] ring-1 ring-nova-primary/20' : ''}`}
                 style={{
                     zoom: zoom / 100,
+                    // Dynamic height based on content - expands automatically when limit reached
                     minHeight: PAGE_HEIGHT,
-                    // Simulate Pages with CSS background
-                    backgroundImage: `linear-gradient(to bottom, transparent ${PAGE_HEIGHT - 2}px, #0f0f13 ${PAGE_HEIGHT - 2}px, #0f0f13 ${PAGE_HEIGHT + 20}px, transparent ${PAGE_HEIGHT + 20}px)`,
-                    backgroundSize: `100% ${PAGE_HEIGHT + 20}px`,
+                    height: pageCount > 1 ? `${pageCount * PAGE_HEIGHT}px` : PAGE_HEIGHT,
+                    // Simulate Pages with CSS background - dark line at bottom of each page
+                    backgroundImage: `linear-gradient(to bottom, transparent ${PAGE_HEIGHT - 2}px, #0f0f13 ${PAGE_HEIGHT - 2}px, #0f0f13 ${PAGE_HEIGHT}px, transparent ${PAGE_HEIGHT}px)`,
+                    backgroundSize: `100% ${PAGE_HEIGHT}px`,
                     backgroundRepeat: 'repeat-y',
                     paddingBottom: '40px'
                 }}
@@ -483,6 +490,7 @@ export const NoteEditor: React.FC<NoteEditorProps> = ({ shape, onClose, onUpdate
                         onKeyDown={handleKeyDown}
                         spellCheck={isSpellCheck}
                         placeholder="Start typing..."
+                        name="page"
                         className="w-full bg-transparent resize-none outline-none text-slate-200 text-lg leading-relaxed px-12 py-16 font-sans selection:bg-nova-primary/30 overflow-hidden"
                         style={{ minHeight: PAGE_HEIGHT }}
                     />
