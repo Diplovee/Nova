@@ -308,16 +308,13 @@ export const ShapeLayer: React.FC<ShapeLayerProps> = ({
                  {isImageShape ? (
                      <div className="w-full h-full bg-black/40 flex items-center justify-center overflow-hidden">
                          {shape.attachments && shape.attachments[0] ? (
-                             <img src={shape.attachments[0].url} alt={shape.attachments[0].name} className="w-full h-full object-cover" />
+                             <img src={shape.attachments[0].url} alt={shape.attachments[0].name} className="w-full h-full object-contain" />
                          ) : (
                              <div className="text-slate-500 flex flex-col items-center">
                                  <ImageIcon size={32} />
                                  <span className="text-xs mt-2">No Image</span>
                              </div>
                          )}
-                         <div className="absolute bottom-0 w-full bg-gradient-to-t from-black/80 to-transparent p-3 pt-8">
-                             <span className="text-white text-sm font-medium truncate block">{shape.text}</span>
-                         </div>
                      </div>
                  ) : !isRect && (
                     <div className="flex flex-col h-full">
