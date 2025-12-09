@@ -2,7 +2,7 @@ import React, { useState, useRef, useCallback } from 'react';
 import { ToolButton } from './ui/ToolButton';
 import { CustomTooltip } from './ui/CustomTooltip';
 import { ShapeType, Shape, ShapeStyling } from '../types';
-import { Maximize2, Minimize2, Scan, Crosshair, ZoomIn, ZoomOut, Palette, Square, SquareDashed, CircleDashed, FileText, Table, Database, Copy, Lock, Unlock, Layers, Group, Ungroup, Network, Shrink, ImageIcon, Mic, Sparkles, Plus, MoreVertical, Lightbulb, Zap, Wrench } from 'lucide-react';
+import { Maximize2, Minimize2, Scan, Crosshair, ZoomIn, ZoomOut, Palette, Square, SquareDashed, CircleDashed, FileText, Table, Database, Copy, Lock, Unlock, Layers, Group, Ungroup, Network, Shrink, ImageIcon, Mic, Sparkles, Plus, MoreVertical, Lightbulb, Zap, Wrench, Bold, Italic, Underline, Type, AlignLeft, AlignCenter, AlignRight, AlignJustify, List, ListOrdered } from 'lucide-react';
 
 interface ColorPickerProps {
   color: string;
@@ -425,18 +425,7 @@ export const RightPanel: React.FC<RightPanelProps> = ({
                 </div>
 
                 {/* Advanced properties for all shape types */}
-                <div>
-                  <label className="text-xs text-slate-500 mb-1 block flex justify-between">
-                    <span>Border Width</span>
-                    <span>{selectedShape.styling?.borderWidth || 0}px</span>
-                  </label>
-                  <input
-                    type="range" min="0" max="10"
-                    value={selectedShape.styling?.borderWidth || 0}
-                    onChange={(e) => updateStyling({ borderWidth: parseInt(e.target.value) })}
-                    className="w-full accent-nova-primary h-1 bg-slate-700 rounded-lg appearance-none cursor-pointer"
-                  />
-                </div>
+
                 <div>
                   <label className="text-xs text-slate-500 mb-1 block flex justify-between">
                     <span>Corner Radius</span>
@@ -457,6 +446,142 @@ export const RightPanel: React.FC<RightPanelProps> = ({
                     <button onClick={() => updateStyling({ borderStyle: 'dotted' })} className="p-2 hover:bg-slate-700 rounded"><CircleDashed size={16}/></button>
                   </div>
                 </div>
+
+                {/* Text formatting options - only for text shapes */}
+                {selectedShape.type === ShapeType.TEXT && (
+                  <>
+                    <div>
+                      <label className="text-xs text-slate-500 mb-1 block">Text Format</label>
+                      <div className="flex gap-2 mb-2">
+                        <button
+                          onClick={() => updateStyling({ fontWeight: selectedShape.styling?.fontWeight === 'bold' ? 'normal' : 'bold' })}
+                          className={`p-2 rounded ${selectedShape.styling?.fontWeight === 'bold' ? 'bg-nova-primary text-black' : 'hover:bg-slate-700'}`}
+                        >
+                          <Bold size={16}/>
+                        </button>
+                        <button
+                          onClick={() => updateStyling({ fontStyle: selectedShape.styling?.fontStyle === 'italic' ? 'normal' : 'italic' })}
+                          className={`p-2 rounded ${selectedShape.styling?.fontStyle === 'italic' ? 'bg-nova-primary text-black' : 'hover:bg-slate-700'}`}
+                        >
+                          <Italic size={16}/>
+                        </button>
+                        <button
+                          onClick={() => updateStyling({ textDecoration: selectedShape.styling?.textDecoration === 'underline' ? 'none' : 'underline' })}
+                          className={`p-2 rounded ${selectedShape.styling?.textDecoration === 'underline' ? 'bg-nova-primary text-black' : 'hover:bg-slate-700'}`}
+                        >
+                          <Underline size={16}/>
+                        </button>
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="text-xs text-slate-500 mb-1 block flex justify-between">
+                        <span>Font Size</span>
+                        <span>{selectedShape.styling?.fontSize || 14}px</span>
+                      </label>
+                      <input
+                        type="range" min="8" max="72"
+                        value={selectedShape.styling?.fontSize || 14}
+                        onChange={(e) => updateStyling({ fontSize: parseInt(e.target.value) })}
+                        className="w-full accent-nova-primary h-1 bg-slate-700 rounded-lg appearance-none cursor-pointer"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="text-xs text-slate-500 mb-1 block">Font Family</label>
+                      <select
+                        value={selectedShape.styling?.fontFamily || 'Inter'}
+                        onChange={(e) => updateStyling({ fontFamily: e.target.value })}
+                        className="w-full bg-slate-800 border border-slate-700 rounded-lg p-2 text-white focus:border-nova-primary outline-none"
+                      >
+                        <option value="Inter">Inter</option>
+                        <option value="Arial">Arial</option>
+                        <option value="Helvetica">Helvetica</option>
+                        <option value="Times New Roman">Times New Roman</option>
+                        <option value="Georgia">Georgia</option>
+                        <option value="Verdana">Verdana</option>
+                        <option value="Courier New">Courier New</option>
+                        <option value="Roboto">Roboto</option>
+                        <option value="Open Sans">Open Sans</option>
+                        <option value="Lato">Lato</option>
+                        <option value="Montserrat">Montserrat</option>
+                        <option value="Poppins">Poppins</option>
+                        <option value="other">Other...</option>
+                      </select>
+                      {selectedShape.styling?.fontFamily === 'other' && (
+                        <input
+                          type="text"
+                          placeholder="Custom font family"
+                          className="w-full bg-slate-800 border border-slate-700 rounded-lg p-2 text-white mt-2 focus:border-nova-primary outline-none"
+                          onChange={(e) => e.target.value && updateStyling({ fontFamily: e.target.value })}
+                        />
+                      )}
+                    </div>
+
+                    <div>
+                      <label className="text-xs text-slate-500 mb-1 block">Text Align</label>
+                      <div className="flex gap-2 mb-2">
+                        <button
+                          onClick={() => updateStyling({ textAlign: 'left' })}
+                          className={`p-2 rounded ${selectedShape.styling?.textAlign === 'left' ? 'bg-nova-primary text-black' : 'hover:bg-slate-700'}`}
+                        >
+                          <AlignLeft size={16}/>
+                        </button>
+                        <button
+                          onClick={() => updateStyling({ textAlign: 'center' })}
+                          className={`p-2 rounded ${selectedShape.styling?.textAlign === 'center' ? 'bg-nova-primary text-black' : 'hover:bg-slate-700'}`}
+                        >
+                          <AlignCenter size={16}/>
+                        </button>
+                        <button
+                          onClick={() => updateStyling({ textAlign: 'right' })}
+                          className={`p-2 rounded ${selectedShape.styling?.textAlign === 'right' ? 'bg-nova-primary text-black' : 'hover:bg-slate-700'}`}
+                        >
+                          <AlignRight size={16}/>
+                        </button>
+                        <button
+                          onClick={() => updateStyling({ textAlign: 'justify' })}
+                          className={`p-2 rounded ${selectedShape.styling?.textAlign === 'justify' ? 'bg-nova-primary text-black' : 'hover:bg-slate-700'}`}
+                        >
+                          <AlignJustify size={16}/>
+                        </button>
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="text-xs text-slate-500 mb-1 block">Lists</label>
+                      <div className="flex gap-2 mb-2">
+                        <button
+                          onClick={() => updateStyling({ listStyle: selectedShape.styling?.listStyle === 'bullet' ? 'none' : 'bullet' })}
+                          className={`p-2 rounded ${selectedShape.styling?.listStyle === 'bullet' ? 'bg-nova-primary text-black' : 'hover:bg-slate-700'}`}
+                          title="Bullet List"
+                        >
+                          <List size={16}/>
+                        </button>
+                        <button
+                          onClick={() => updateStyling({ listStyle: selectedShape.styling?.listStyle === 'numbered' ? 'none' : 'numbered' })}
+                          className={`p-2 rounded ${selectedShape.styling?.listStyle === 'numbered' ? 'bg-nova-primary text-black' : 'hover:bg-slate-700'}`}
+                          title="Numbered List"
+                        >
+                          <ListOrdered size={16}/>
+                        </button>
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="text-xs text-slate-500 mb-1 block flex justify-between">
+                        <span>Font Weight</span>
+                        <span>{selectedShape.styling?.fontWeight || 'normal'}</span>
+                      </label>
+                      <input
+                        type="range" min="100" max="900" step="100"
+                        value={selectedShape.styling?.fontWeight === 'bold' ? '700' : selectedShape.styling?.fontWeight === 'normal' ? '400' : (selectedShape.styling?.fontWeight || '400')}
+                        onChange={(e) => updateStyling({ fontWeight: e.target.value })}
+                        className="w-full accent-nova-primary h-1 bg-slate-700 rounded-lg appearance-none cursor-pointer"
+                      />
+                    </div>
+                  </>
+                )}
               </div>
             </div>
           ) : (

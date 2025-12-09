@@ -176,6 +176,68 @@ export const ShapeLayer: React.FC<ShapeLayerProps> = ({
     onUpdateShapes(shapes.map(s => s.id === shapeId ? { ...shape, subtasks: [] } : s));
   };
 
+  // Auto-resize text shapes to fit content
+  const getTextDimensions = (text: string, styling?: ShapeStyling) => {
+    if (!text || !text.trim()) {
+      return { width: 200, height: 60 }; // Default min size
+    }
+
+    // Create a temporary element to measure text
+    const tempDiv = document.createElement('div');
+    tempDiv.style.position = 'absolute';
+    tempDiv.style.visibility = 'hidden';
+    tempDiv.style.whiteSpace = 'pre-wrap';
+    tempDiv.style.wordBreak = 'break-word';
+    tempDiv.style.maxWidth = '600px'; // Max width limit
+    tempDiv.style.padding = '8px'; // Account for padding
+    tempDiv.style.fontSize = styling?.fontSize ? `${styling.fontSize}px` : '14px';
+    tempDiv.style.fontWeight = styling?.fontWeight || 'normal';
+    tempDiv.style.fontFamily = styling?.fontFamily || 'Inter';
+    tempDiv.style.lineHeight = '1.2';
+    tempDiv.innerText = text;
+
+    document.body.appendChild(tempDiv);
+    const rect = tempDiv.getBoundingClientRect();
+    document.body.removeChild(tempDiv);
+
+    const padding = 16; // p-2 = 8px padding on each side = 16px total
+    const minWidth = 120; // Minimum readable width
+    const minHeight = 40; // Minimum readable height
+    const maxWidth = 600; // Maximum width for readability
+
+    return {
+      width: Math.max(minWidth, Math.min(maxWidth, rect.width + padding)),
+      height: Math.max(minHeight, rect.height + padding)
+    };
+  };
+
+  // Format text with list styling
+  const formatTextWithLists = (text: string, listStyle?: 'none' | 'bullet' | 'numbered') => {
+    if (!text || listStyle === 'none' || !listStyle) {
+      return text;
+    }
+
+    const lines = text.split('\n');
+    if (listStyle === 'bullet') {
+      return lines.map(line => line.trim() ? '• ' + line.trim() : '').join('\n');
+    } else if (listStyle === 'numbered') {
+      return lines.map((line, index) => line.trim() ? `${index + 1}. ${line.trim()}` : '').join('\n');
+    }
+    return text;
+  };
+
+  // Auto-resize shape when text changes
+  const autoResizeTextShape = (shape: Shape, newText?: string) => {
+    const textContent = newText || shape.text || '';
+    const dimensions = getTextDimensions(textContent, shape.styling);
+    return {
+      ...shape,
+      width: dimensions.width,
+      height: dimensions.height,
+      text: newText !== undefined ? newText : shape.text
+    };
+  };
+
 
 
   const getShapeStyle = (shape: Shape, isSelected: boolean) => {
@@ -186,7 +248,7 @@ export const ShapeLayer: React.FC<ShapeLayerProps> = ({
         baseStyle.backgroundColor = shape.styling.fillColor;
     } else if (shape.color) {
         baseStyle.backgroundColor = shape.color;
-    } else if (!shape.styling?.fillColor && !shape.color && shape.type !== ShapeType.RECTANGLE && shape.type !== ShapeType.IMAGE) {
+    } else if (!shape.styling?.fillColor && !shape.color && shape.type !== ShapeType.RECTANGLE && shape.type !== ShapeType.IMAGE && shape.type !== ShapeType.TEXT) {
         baseStyle.backgroundColor = '#272732'; // Default Nova Card
     }
 
@@ -230,7 +292,7 @@ export const ShapeLayer: React.FC<ShapeLayerProps> = ({
               key={shape.id}
               data-shape
               className={`absolute group transition-shadow duration-200 select-none ${
-                  isSelected && !isRect ? 'z-[90]' : 'z-10'
+                  isSelected && !isRect && !isImageShape && shape.type !== ShapeType.TEXT ? 'z-[90]' : 'z-10'
               }`}
               style={{
                 left: shape.x,
@@ -262,10 +324,10 @@ export const ShapeLayer: React.FC<ShapeLayerProps> = ({
             >
 
 
-              <div 
+              <div
                 className={`w-full h-full relative overflow-hidden transition-all duration-200 flex flex-col ${
-                 isSelected && !isRect ? 'ring-2 ring-nova-primary shadow-[0_0_20px_rgba(34,211,238,0.3)]' : isRect ? '' : 'shadow-lg hover:shadow-xl border border-slate-700/50'
-                } ${!isRect ? 'rounded-2xl' : ''}`}
+                 isSelected && !isRect && !isImageShape && shape.type !== ShapeType.TEXT ? 'ring-2 ring-nova-primary shadow-[0_0_20px_rgba(34,211,238,0.3)]' : isRect ? '' : (isImageShape || shape.type === ShapeType.TEXT ? '' : 'shadow-lg hover:shadow-xl border border-slate-700/50')
+                } ${!isRect && shape.type !== ShapeType.TEXT ? 'rounded-2xl' : ''}`}
                 style={getShapeStyle(shape, isSelected)}
               >
                  
@@ -307,6 +369,71 @@ export const ShapeLayer: React.FC<ShapeLayerProps> = ({
                              <div className="text-slate-500 flex flex-col items-center">
                                  <ImageIcon size={32} />
                                  <span className="text-xs mt-2">No Image</span>
+                             </div>
+                         )}
+                     </div>
+                 ) : shape.type === ShapeType.TEXT ? (
+                     <div className="w-full h-full flex flex-col items-center justify-center overflow-hidden p-2 box-border">
+                         {isEditing && editingId === shape.id ? (
+                             <textarea
+                                 ref={textAreaRef}
+                                 autoFocus
+                                 className={`w-full h-full bg-transparent resize-none outline-none text-slate-200 placeholder:text-slate-500/50 leading-tight whitespace-pre-wrap break-words overflow-wrap-anywhere ${
+                                     shape.styling?.textAlign === 'center' ? 'text-center' :
+                                     shape.styling?.textAlign === 'right' ? 'text-right' :
+                                     shape.styling?.textAlign === 'justify' ? 'text-justify' : 'text-left'
+                                 }`}
+                                 value={shape.text}
+                                 onChange={(e) => {
+                                   e.stopPropagation();
+                                   const newShape = autoResizeTextShape(shape, e.target.value);
+                                   setShapesDirectly(shapes.map(s => s.id === shape.id ? newShape : s));
+                                 }}
+                                 onBlur={() => {
+                                   setIsEditing(false);
+                                   setEditingId(null);
+                                   const newShape = autoResizeTextShape(shape);
+                                   onUpdateShapes(shapes.map(s => s.id === shape.id ? newShape : s));
+                                 }}
+                                 onKeyDown={(e) => e.stopPropagation()}
+                                 onMouseDown={(e) => e.stopPropagation()}
+                                 onMouseUp={(e) => e.stopPropagation()}
+                                 placeholder="Type something..."
+                                 style={{
+                                   padding: 0,
+                                   margin: 0,
+                                   textAlign: shape.styling?.textAlign || 'left',
+                                   color: shape.styling?.fillColor,
+                                   fontWeight: shape.styling?.fontWeight,
+                                   fontSize: shape.styling?.fontSize ? `${shape.styling.fontSize}px` : undefined,
+                                   fontFamily: shape.styling?.fontFamily,
+                                   fontStyle: shape.styling?.fontStyle,
+                                   textDecoration: shape.styling?.textDecoration,
+                                   lineHeight: 1.2
+                                 }}
+                             />
+                         ) : (
+                             <div
+                                 className={`w-full h-full flex flex-col justify-start whitespace-pre-wrap break-words overflow-wrap-anywhere ${
+                                     shape.text ? 'text-slate-200' : 'text-slate-400 italic'
+                                 } ${shape.styling?.textAlign === 'center' ? 'text-center' :
+                                     shape.styling?.textAlign === 'right' ? 'text-right' :
+                                     shape.styling?.textAlign === 'justify' ? 'text-justify' : 'text-left'}`}
+                                 style={{
+                                   padding: 0,
+                                   margin: 0,
+                                   fontSize: shape.text && shape.styling?.fontSize ? `${shape.styling.fontSize}px` : undefined,
+                                   color: shape.text && shape.styling?.fillColor ? shape.styling.fillColor : undefined,
+                                   fontWeight: shape.text && shape.styling?.fontWeight ? shape.styling.fontWeight : undefined,
+                                   fontFamily: shape.text && shape.styling?.fontFamily ? shape.styling.fontFamily : undefined,
+                                   fontStyle: shape.text && shape.styling?.fontStyle ? shape.styling.fontStyle : undefined,
+                                   textDecoration: shape.text && shape.styling?.textDecoration ? shape.styling.textDecoration : undefined,
+                                   lineHeight: 1.2,
+                                   height: 'auto',
+                                   maxHeight: '100%'
+                                 }}
+                             >
+                                 {shape.text ? formatTextWithLists(shape.text, shape.styling?.listStyle) : 'Double Click to type...'}
                              </div>
                          )}
                      </div>
@@ -531,6 +658,7 @@ export const ShapeLayer: React.FC<ShapeLayerProps> = ({
             onToggleLock={toggleLock}
             onGroup={onGroup}
             onUngroup={onUngroup}
+            onUpdateStyling={updateStyling}
             onAIActions={() => setShowAiModal(true)}
             onExpandSubtasks={onExpandSubtasks}
             onCollapseSubtasks={onCollapseSubtasks}

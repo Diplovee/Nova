@@ -1,6 +1,6 @@
 import React from 'react';
-import { Shape, ShapeType } from '../types';
-import { Copy, Layers, Lock, Unlock, Group, Ungroup, Sparkles, Network, Shrink, Plus, Trash2 } from 'lucide-react';
+import { Shape, ShapeType, ShapeStyling } from '../types';
+import { Copy, Layers, Lock, Unlock, Group, Ungroup, Sparkles, Network, Shrink, Plus, Trash2, Bold, Italic, Underline, List, ListOrdered, AlignLeft, AlignCenter, AlignRight } from 'lucide-react';
 import { CustomTooltip } from './ui/CustomTooltip';
 
 interface ContextMenuProps {
@@ -16,6 +16,7 @@ interface ContextMenuProps {
   onGroup: () => void;
   onUngroup: () => void;
   onAIActions: () => void;
+  onUpdateStyling?: (styling: Partial<ShapeStyling>) => void;
   onExpandSubtasks?: (shapeId: string) => void;
   onCollapseSubtasks?: (shapeId: string) => void;
   onAddSubtask?: (shapeId: string) => void;
@@ -35,6 +36,7 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
   onGroup,
   onUngroup,
   onAIActions,
+  onUpdateStyling,
   onExpandSubtasks,
   onCollapseSubtasks,
   onAddSubtask,
@@ -206,6 +208,146 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
                 </button>
               </CustomTooltip>
             )}
+          </>
+        )}
+
+        {/* Text Formatting - only for text shapes */}
+        {triggerShape.type === ShapeType.TEXT && (
+          <>
+            <div className="h-px bg-slate-700/50 my-1" />
+
+            {/* Quick Text Format */}
+            <div className="grid grid-cols-4 gap-0.5">
+              <CustomTooltip content="Bold">
+                <button
+                  onClick={() => {
+                    const newStyling = {
+                      fontWeight: triggerShape.styling?.fontWeight === 'bold' ? 'normal' : 'bold'
+                    };
+                    onUpdateStyling(newStyling);
+                    onClose();
+                  }}
+                  className={`flex items-center justify-center px-3 py-2 text-sm hover:bg-slate-700/50 rounded transition-colors ${
+                    triggerShape.styling?.fontWeight === 'bold' ? 'bg-nova-primary text-black' : 'text-slate-300 hover:text-white'
+                  }`}
+                >
+                  <Bold size={16} />
+                </button>
+              </CustomTooltip>
+
+              <CustomTooltip content="Italic">
+                <button
+                  onClick={() => {
+                    const newStyling = {
+                      fontStyle: triggerShape.styling?.fontStyle === 'italic' ? 'normal' : 'italic'
+                    };
+                    onUpdateStyling(newStyling);
+                    onClose();
+                  }}
+                  className={`flex items-center justify-center px-3 py-2 text-sm hover:bg-slate-700/50 rounded transition-colors ${
+                    triggerShape.styling?.fontStyle === 'italic' ? 'bg-nova-primary text-black' : 'text-slate-300 hover:text-white'
+                  }`}
+                >
+                  <Italic size={16} />
+                </button>
+              </CustomTooltip>
+
+              <CustomTooltip content="Underline">
+                <button
+                  onClick={() => {
+                    const newStyling = {
+                      textDecoration: triggerShape.styling?.textDecoration === 'underline' ? 'none' : 'underline'
+                    };
+                    onUpdateStyling(newStyling);
+                    onClose();
+                  }}
+                  className={`flex items-center justify-center px-3 py-2 text-sm hover:bg-slate-700/50 rounded transition-colors ${
+                    triggerShape.styling?.textDecoration === 'underline' ? 'bg-nova-primary text-black' : 'text-slate-300 hover:text-white'
+                  }`}
+                >
+                  <Underline size={16} />
+                </button>
+              </CustomTooltip>
+
+              <CustomTooltip content="Bullet List">
+                <button
+                  onClick={() => {
+                    const newStyling = {
+                      listStyle: triggerShape.styling?.listStyle === 'bullet' ? 'none' : 'bullet'
+                    };
+                    onUpdateStyling(newStyling);
+                    onClose();
+                  }}
+                  className={`flex items-center justify-center px-3 py-2 text-sm hover:bg-slate-700/50 rounded transition-colors ${
+                    triggerShape.styling?.listStyle === 'bullet' ? 'bg-nova-primary text-black' : 'text-slate-300 hover:text-white'
+                  }`}
+                >
+                  <List size={16} />
+                </button>
+              </CustomTooltip>
+            </div>
+
+            {/* Text Alignment */}
+            <div className="grid grid-cols-4 gap-0.5 mt-1">
+              <CustomTooltip content="Align Left">
+                <button
+                  onClick={() => {
+                    onUpdateStyling({ textAlign: 'left' });
+                    onClose();
+                  }}
+                  className={`flex items-center justify-center px-3 py-2 text-sm hover:bg-slate-700/50 rounded transition-colors ${
+                    triggerShape.styling?.textAlign === 'left' ? 'bg-nova-primary text-black' : 'text-slate-300 hover:text-white'
+                  }`}
+                >
+                  <AlignLeft size={16} />
+                </button>
+              </CustomTooltip>
+
+              <CustomTooltip content="Align Center">
+                <button
+                  onClick={() => {
+                    onUpdateStyling({ textAlign: 'center' });
+                    onClose();
+                  }}
+                  className={`flex items-center justify-center px-3 py-2 text-sm hover:bg-slate-700/50 rounded transition-colors ${
+                    triggerShape.styling?.textAlign === 'center' ? 'bg-nova-primary text-black' : 'text-slate-300 hover:text-white'
+                  }`}
+                >
+                  <AlignCenter size={16} />
+                </button>
+              </CustomTooltip>
+
+              <CustomTooltip content="Align Right">
+                <button
+                  onClick={() => {
+                    onUpdateStyling({ textAlign: 'right' });
+                    onClose();
+                  }}
+                  className={`flex items-center justify-center px-3 py-2 text-sm hover:bg-slate-700/50 rounded transition-colors ${
+                    triggerShape.styling?.textAlign === 'right' ? 'bg-nova-primary text-black' : 'text-slate-300 hover:text-white'
+                  }`}
+                >
+                  <AlignRight size={16} />
+                </button>
+              </CustomTooltip>
+
+              <CustomTooltip content="Numbered List">
+                <button
+                  onClick={() => {
+                    const newStyling = {
+                      listStyle: triggerShape.styling?.listStyle === 'numbered' ? 'none' : 'numbered'
+                    };
+                    onUpdateStyling(newStyling);
+                    onClose();
+                  }}
+                  className={`flex items-center justify-center px-3 py-2 text-sm hover:bg-slate-700/50 rounded transition-colors ${
+                    triggerShape.styling?.listStyle === 'numbered' ? 'bg-nova-primary text-black' : 'text-slate-300 hover:text-white'
+                  }`}
+                >
+                  <ListOrdered size={16} />
+                </button>
+              </CustomTooltip>
+            </div>
           </>
         )}
 

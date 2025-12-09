@@ -69,6 +69,14 @@ export interface ShapeStyling {
   borderWidth?: number;
   borderRadius?: number;
   borderStyle?: 'solid' | 'dashed' | 'dotted';
+  // Text styling properties
+  fontSize?: number;
+  fontWeight?: string;
+  fontFamily?: string;
+  fontStyle?: string;
+  textDecoration?: string;
+  textAlign?: 'left' | 'center' | 'right' | 'justify';
+  listStyle?: 'none' | 'bullet' | 'numbered';
 }
 
 export interface Shape {
