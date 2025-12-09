@@ -1,9 +1,10 @@
 
 import React, { useState } from 'react';
 import { FloatingChip } from './ui/FloatingChip';
-import { 
-    MoreHorizontal, Plus, CheckCircle2, Circle, ListChecks, 
-    CornerDownRight, Trash2, Edit2, Flag, AlertCircle, Calendar, X 
+import { ConfirmationModal } from './ConfirmationModal';
+import {
+    MoreHorizontal, Plus, CheckCircle2, Circle, ListChecks,
+    CornerDownRight, Trash2, Edit2, Flag, AlertCircle, Calendar, X
 } from 'lucide-react';
 import { Shape, ShapeType } from '../types';
 
@@ -233,6 +234,8 @@ export const TaskBoard: React.FC<TaskBoardProps> = ({ shapes, onUpdateShapes }) 
   const [filterPriority, setFilterPriority] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [targetColumnStatus, setTargetColumnStatus] = useState<'TODO' | 'IN_PROGRESS' | 'DONE'>('TODO');
+  const [deleteTaskId, setDeleteTaskId] = useState<string | null>(null);
+  const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
 
   const filteredShapes = shapes.filter(s => {
       if (s.type !== ShapeType.TASK) return true; // Keep other shapes in array, filter visually in column
@@ -253,9 +256,26 @@ export const TaskBoard: React.FC<TaskBoardProps> = ({ shapes, onUpdateShapes }) 
   };
 
   const handleDeleteShape = (id: string) => {
-      if(confirm("Delete this task?")) {
-          onUpdateShapes(shapes.filter(s => s.id !== id));
+      setDeleteTaskId(id);
+      setShowDeleteConfirmation(true);
+  };
+
+  const confirmDeleteTask = () => {
+      if (deleteTaskId) {
+          onUpdateShapes(shapes.filter(s => s.id !== deleteTaskId));
+          setDeleteTaskId(null);
       }
+      setShowDeleteConfirmation(false);
+  };
+
+  const cancelDeleteTask = () => {
+      setDeleteTaskId(null);
+      setShowDeleteConfirmation(false);
+  };
+
+  const getTaskTitle = (id: string) => {
+      const task = shapes.find(s => s.id === id);
+      return task?.text || 'this task';
   };
 
   const handleCreateTask = (title: string, priority: 'HIGH' | 'MEDIUM' | 'LOW', dueDateStr: string) => {
@@ -337,6 +357,17 @@ export const TaskBoard: React.FC<TaskBoardProps> = ({ shapes, onUpdateShapes }) 
             onAddTask={() => openCreateModal('DONE')}
         />
       </div>
+
+      <ConfirmationModal
+        isOpen={showDeleteConfirmation}
+        title="Delete Task"
+        message={`Are you sure you want to delete "${getTaskTitle(deleteTaskId || '')}"? This action cannot be undone.`}
+        confirmText="Delete Task"
+        cancelText="Cancel"
+        onConfirm={confirmDeleteTask}
+        onCancel={cancelDeleteTask}
+        variant="danger"
+      />
     </div>
   );
 };

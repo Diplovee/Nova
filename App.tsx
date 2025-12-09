@@ -11,6 +11,7 @@ import { ResourcesView } from './components/ResourcesView';
 import { SettingsView } from './components/SettingsView';
 import { Onboarding } from './components/Onboarding';
 import { SplashScreen } from './components/SplashScreen';
+import { ConfirmationModal } from './components/ConfirmationModal';
 import { Page, Shape, ShapeType, Board } from './types';
 import { FileText, Table, Pencil, ArrowLeft } from 'lucide-react';
 
@@ -214,6 +215,10 @@ const App: React.FC = () => {
   const [showSplash, setShowSplash] = useState(true);
   const [showOnboarding, setShowOnboarding] = useState(false);
 
+  // --- Confirmation Modal State ---
+  const [deleteBoardId, setDeleteBoardId] = useState<string | null>(null);
+  const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
+
   // --- Load Saved Data ---
   useEffect(() => {
       // Simulate loading time for splash screen
@@ -299,18 +304,35 @@ const App: React.FC = () => {
 
   const deleteBoard = (e: React.MouseEvent, id: string) => {
       e.stopPropagation();
-      if (confirm('Are you sure you want to delete this project?')) {
-          const newBoards = boards.filter(b => b.id !== id);
+      setDeleteBoardId(id);
+      setShowDeleteConfirmation(true);
+  };
+
+  const confirmDeleteBoard = () => {
+      if (deleteBoardId) {
+          const newBoards = boards.filter(b => b.id !== deleteBoardId);
           setBoards(newBoards);
           localStorage.setItem('nova_boards', JSON.stringify(newBoards));
-          
-          if (currentBoard?.id === id) {
+
+          if (currentBoard?.id === deleteBoardId) {
               setCurrentBoard(null);
               setShapes([]);
               setCurrentPage(Page.DASHBOARD);
               localStorage.removeItem('nova_last_board_id');
           }
       }
+      setDeleteBoardId(null);
+      setShowDeleteConfirmation(false);
+  };
+
+  const cancelDeleteBoard = () => {
+      setDeleteBoardId(null);
+      setShowDeleteConfirmation(false);
+  };
+
+  const getBoardTitle = (id: string) => {
+      const board = boards.find(b => b.id === id);
+      return board?.title || 'this project';
   };
 
   const renameBoard = (boardId: string, newTitle: string) => {
@@ -556,12 +578,23 @@ const App: React.FC = () => {
             />
         )}
         {editingItem?.type === ShapeType.SHEET && (
-            <SheetEditor 
+            <SheetEditor
                 shape={editingItem}
                 onClose={() => setEditingItem(null)}
                 onUpdate={handleSingleShapeUpdate}
             />
         )}
+
+        <ConfirmationModal
+          isOpen={showDeleteConfirmation}
+          title="Delete Project"
+          message={`Are you sure you want to delete "${getBoardTitle(deleteBoardId || '')}"? This will permanently remove all content and cannot be undone.`}
+          confirmText="Delete Project"
+          cancelText="Cancel"
+          onConfirm={confirmDeleteBoard}
+          onCancel={cancelDeleteBoard}
+          variant="danger"
+        />
       </main>
     </div>
   );
