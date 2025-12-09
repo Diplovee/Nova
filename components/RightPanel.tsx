@@ -2,7 +2,7 @@ import React, { useState, useRef, useCallback } from 'react';
 import { ToolButton } from './ui/ToolButton';
 import { CustomTooltip } from './ui/CustomTooltip';
 import { ShapeType, Shape, ShapeStyling } from '../types';
-import { Maximize2, Minimize2, Scan, Crosshair, ZoomIn, ZoomOut, Palette, Square, SquareDashed, CircleDashed, FileText, Table, Database, Copy, Lock, Unlock, Layers, Group, Ungroup, Network, Shrink, ImageIcon, Mic, Sparkles, Plus, MoreVertical, Lightbulb, Zap } from 'lucide-react';
+import { Maximize2, Minimize2, Scan, Crosshair, ZoomIn, ZoomOut, Palette, Square, SquareDashed, CircleDashed, FileText, Table, Database, Copy, Lock, Unlock, Layers, Group, Ungroup, Network, Shrink, ImageIcon, Mic, Sparkles, Plus, MoreVertical, Lightbulb, Zap, Wrench } from 'lucide-react';
 
 interface ColorPickerProps {
   color: string;
@@ -266,7 +266,7 @@ export const RightPanel: React.FC<RightPanelProps> = ({
   // Tab buttons
   const tabs = [
     { id: 'view', label: 'View', icon: Scan },
-    { id: 'tools', label: 'Tools', icon: FileText },
+    { id: 'tools', label: 'Tools', icon: Wrench },
     { id: 'properties', label: 'Prop', icon: Palette },
     { id: 'actions', label: 'Actions', icon: Zap }
   ] as const;
