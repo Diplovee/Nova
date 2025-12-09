@@ -1,0 +1,12 @@
+# Code Owners
+# This file defines who owns specific parts of the codebase
+# Format: path @username or @team
+
+# Board components
+components/board/ @diplov
+
+# Services
+services/ @diplov
+
+# Default owner for everything else
+* @diplov

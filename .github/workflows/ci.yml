@@ -1,0 +1,20 @@
+name: CI/CD Pipeline
+on: [push, pull_request]
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+      - run: npm install
+      - run: npm run build  # Builds with Vite
+      - run: npm test       # Add tests for components like BoardUI
+      - run: npm run lint   # ESLint for TypeScript
+  deploy:
+    if: github.ref == 'refs/heads/main'
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Deploy to Vercel/Netlify"  # Or use actions for hosting

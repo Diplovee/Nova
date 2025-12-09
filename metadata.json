@@ -1,0 +1,7 @@
+{
+  "name": "Nova Project Manager",
+  "description": "A premium, dark-themed visual project planner and resource manager featuring an infinite canvas and AI-driven task breakdown.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}
