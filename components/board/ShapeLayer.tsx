@@ -6,7 +6,7 @@ import { ContextMenu } from '../ContextMenu';
 import {
   LayoutTemplate, Lightbulb, Database, Type, Square, Circle, FileText, Table, Image as ImageIcon, Mic,
   Lock, PlayCircle, CheckCircle2, Sparkles, Plus, Network, Shrink, Copy, MoreVertical,
-  ArrowUpCircle, ArrowDownCircle, Unlock, Minus, PauseCircle, Group, Ungroup, Layers, CornerDownRight
+  ArrowUpCircle, ArrowDownCircle, Unlock, Minus, PauseCircle, Group, Ungroup, Layers, CornerDownRight, Trash2
 } from 'lucide-react';
 
 interface ShapeLayerProps {
@@ -161,6 +161,13 @@ export const ShapeLayer: React.FC<ShapeLayerProps> = ({
     if(!shape || !shape.subtasks) return;
     const updatedSubtasks = shape.subtasks.map(st => st.id === subtaskId ? { ...st, title: newTitle } : st);
     setShapesDirectly(shapes.map(s => s.id === shapeId ? { ...shape, subtasks: updatedSubtasks } : s));
+  };
+
+  const removeSubtask = (shapeId: string, subtaskId: string) => {
+    const shape = shapes.find(s => s.id === shapeId);
+    if(!shape || !shape.subtasks) return;
+    const updatedSubtasks = shape.subtasks.filter(st => st.id !== subtaskId);
+    onUpdateShapes(shapes.map(s => s.id === shapeId ? { ...shape, subtasks: updatedSubtasks } : s));
   };
 
 
@@ -414,17 +421,24 @@ export const ShapeLayer: React.FC<ShapeLayerProps> = ({
                                 <div className="mt-2 space-y-1">
                                     {shape.subtasks!.map(st => (
                                         <div key={st.id} className="group/st flex items-start gap-2 text-sm text-slate-400">
-                                            <button 
+                                            <button
                                                 onClick={(e) => { e.stopPropagation(); toggleSubtaskComplete(shape.id, st.id); }}
                                                 className={`mt-0.5 w-4 h-4 rounded border flex items-center justify-center transition-colors ${st.completed ? 'bg-nova-primary border-nova-primary' : 'border-slate-600 hover:border-nova-primary'}`}
                                             >
                                                 {st.completed && <CheckCircle2 size={10} className="text-black" strokeWidth={3}/>}
                                             </button>
-                                            <input 
+                                            <input
                                                 value={st.title}
                                                 onChange={(e) => updateSubtaskTitle(shape.id, st.id, e.target.value)}
-                                                className={`bg-transparent outline-none w-full ${st.completed ? 'line-through opacity-50' : ''}`}
+                                                className={`bg-transparent outline-none flex-1 ${st.completed ? 'line-through opacity-50' : ''}`}
                                             />
+                                            <button
+                                                onClick={(e) => { e.stopPropagation(); removeSubtask(shape.id, st.id); }}
+                                                className="opacity-0 group-hover/st:opacity-100 text-slate-500 hover:text-red-400 transition-opacity p-0.5 rounded hover:bg-red-500/10"
+                                                title="Remove subtask"
+                                            >
+                                                <Trash2 size={12} />
+                                            </button>
                                         </div>
                                     ))}
                                 </div>

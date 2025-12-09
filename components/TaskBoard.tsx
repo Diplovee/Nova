@@ -92,9 +92,14 @@ const TaskCard: React.FC<{
     const [showMenu, setShowMenu] = useState(false);
 
     const toggleSubtask = (subtaskId: string) => {
-        const newSubtasks = task.subtasks?.map(st => 
+        const newSubtasks = task.subtasks?.map(st =>
             st.id === subtaskId ? { ...st, completed: !st.completed } : st
         );
+        onUpdate({ subtasks: newSubtasks });
+    };
+
+    const removeSubtask = (subtaskId: string) => {
+        const newSubtasks = task.subtasks?.filter(st => st.id !== subtaskId);
         onUpdate({ subtasks: newSubtasks });
     };
 
@@ -140,13 +145,20 @@ const TaskCard: React.FC<{
                     {task.subtasks.map((st, idx) => (
                         <div key={st.id} className="flex items-start gap-2 text-sm text-slate-400 group/st">
                             <CornerDownRight size={14} className="mt-1 text-slate-600 shrink-0"/>
-                            <button 
+                            <button
                                 onClick={(e) => { e.stopPropagation(); toggleSubtask(st.id); }}
                                 className={`mt-0.5 w-3.5 h-3.5 rounded-sm border flex items-center justify-center shrink-0 transition-colors ${st.completed ? 'bg-nova-primary border-nova-primary' : 'border-slate-600 hover:border-nova-primary'}`}
                             >
                                 {st.completed && <CheckCircle2 size={10} className="text-black"/>}
                             </button>
-                            <span className={`leading-tight transition-all ${st.completed ? 'line-through opacity-50' : ''}`}>{st.title}</span>
+                            <span className={`leading-tight flex-1 transition-all ${st.completed ? 'line-through opacity-50' : ''}`}>{st.title}</span>
+                            <button
+                                onClick={(e) => { e.stopPropagation(); removeSubtask(st.id); }}
+                                className="opacity-0 group-hover/st:opacity-100 text-slate-500 hover:text-red-400 transition-opacity p-0.5 rounded hover:bg-red-500/10"
+                                title="Remove subtask"
+                            >
+                                <Trash2 size={12} />
+                            </button>
                         </div>
                     ))}
                 </div>
