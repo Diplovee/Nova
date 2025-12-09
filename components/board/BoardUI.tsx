@@ -74,7 +74,12 @@ export const BoardUI: React.FC<BoardUIProps> = ({
   return (
     <>
       {/* Toolbar */}
-      <div className={`absolute left-1/2 -translate-x-1/2 bottom-8 bg-nova-card/90 backdrop-blur-md border border-slate-700/50 rounded-2xl p-2 shadow-float flex items-center gap-2 transition-all duration-300 z-50`}>
+      <div className={`absolute bg-nova-card/90 backdrop-blur-md border border-slate-700/50 rounded-2xl p-2 shadow-float flex items-center gap-2 transition-all duration-300 z-[102]`}
+        style={{
+          left: `calc((100vw - 256px) / 2 - 300px)`, /* Center on board area with 300px left offset */
+          bottom: '8px',
+          transform: 'none'
+        }}>
          <div className="flex items-center gap-1 pr-2 border-r border-slate-700/50">
              <ToolButton icon={Undo2} title="Undo" isActive={false} onClick={onUndo} disabled={!canUndo} />
              <ToolButton icon={Redo2} title="Redo" isActive={false} onClick={onRedo} disabled={!canRedo} />
