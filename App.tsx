@@ -12,8 +12,9 @@ import { SettingsView } from './components/SettingsView';
 import { Onboarding } from './components/Onboarding';
 import { SplashScreen } from './components/SplashScreen';
 import { ConfirmationModal } from './components/ConfirmationModal';
+import { CustomTooltip } from './components/ui/CustomTooltip';
 import { Page, Shape, ShapeType, Board } from './types';
-import { FileText, Table, Pencil, ArrowLeft } from 'lucide-react';
+import { FileText, Table, Pencil, ArrowLeft, Maximize2, Minimize2 } from 'lucide-react';
 
 const generateId = () => Math.random().toString(36).substr(2, 9);
 
@@ -364,8 +365,9 @@ const App: React.FC = () => {
           setCurrentPage(page);
       }
 
-      // Exit fullscreen when leaving the board view
-      if (page !== Page.NOVA_BOARD && isFullscreen) {
+      // Exit fullscreen when navigating to pages that don't support it
+      const nextPageSupportsFullscreen = [Page.NOVA_BOARD, Page.TASKS, Page.TIMELINE, Page.NOTES, Page.SHEETS].includes(page);
+      if (!nextPageSupportsFullscreen && isFullscreen) {
           setIsFullscreen(false);
           setIsRightPanelCollapsed(false);
       }
@@ -411,18 +413,20 @@ const App: React.FC = () => {
 
   const toggleSidebar = () => setIsSidebarCollapsed(!isSidebarCollapsed);
 
-// Only allow fullscreen on the board page
-const canToggleFullscreen = currentPage === Page.NOVA_BOARD;
+// Allow fullscreen on main content pages
+const canToggleFullscreen = [Page.NOVA_BOARD, Page.TASKS, Page.TIMELINE, Page.NOTES, Page.SHEETS].includes(currentPage);
 
 const toggleFullscreen = () => {
-  // Only toggle fullscreen if we're on the board page
+  // Only toggle fullscreen if we're on an allowed page
   if (!canToggleFullscreen) return;
 
   // Toggle fullscreen mode completely
   const newFullscreenState = !isFullscreen;
   setIsFullscreen(newFullscreenState);
-  // Also hide/show right panel when toggling fullscreen
-  setIsRightPanelCollapsed(newFullscreenState);
+  // Also hide/show right panel when toggling fullscreen (only affects board page)
+  if (currentPage === Page.NOVA_BOARD) {
+    setIsRightPanelCollapsed(newFullscreenState);
+  }
 };
 
   // --- Render ---
@@ -459,27 +463,81 @@ const toggleFullscreen = () => {
             isRightPanelCollapsed={isRightPanelCollapsed}
             isFullscreen={isFullscreen}
             toggleFullscreen={toggleFullscreen}
+            canToggleFullscreen={canToggleFullscreen}
           />
         );
       case Page.TASKS:
         return (
-          <TaskBoard 
-            shapes={shapes}
-            onUpdateShapes={handleUpdateShapes}
-          />
+          <div className="relative h-full">
+            <TaskBoard
+              shapes={shapes}
+              onUpdateShapes={handleUpdateShapes}
+            />
+            {canToggleFullscreen && !isFullscreen && (
+              <div className="absolute bottom-4 right-4 z-10">
+                <CustomTooltip content="Enter fullscreen mode">
+                  <button
+                    onClick={toggleFullscreen}
+                    className="bg-nova-card/90 backdrop-blur-md border border-slate-700/50 rounded-xl p-3 shadow-float hover:bg-nova-card transition-colors group"
+                  >
+                    <Maximize2 size={20} className="text-slate-400 group-hover:text-white" />
+                  </button>
+                </CustomTooltip>
+              </div>
+            )}
+            {canToggleFullscreen && isFullscreen && (
+              <div className="absolute bottom-4 right-4 z-10">
+                <CustomTooltip content="Exit fullscreen mode">
+                  <button
+                    onClick={toggleFullscreen}
+                    className="bg-nova-card/90 backdrop-blur-md border border-slate-700/50 rounded-xl p-3 shadow-float hover:bg-nova-card transition-colors group"
+                  >
+                    <Minimize2 size={20} className="text-slate-400 group-hover:text-white" />
+                  </button>
+                </CustomTooltip>
+              </div>
+            )}
+          </div>
         );
       case Page.TIMELINE:
         return (
-            <TimelineView 
+          <div className="relative h-full">
+            <TimelineView
                 shapes={shapes}
                 onUpdateShapes={handleUpdateShapes}
             />
+            {canToggleFullscreen && !isFullscreen && (
+              <div className="absolute bottom-4 right-4 z-10">
+                <CustomTooltip content="Enter fullscreen mode">
+                  <button
+                    onClick={toggleFullscreen}
+                    className="bg-nova-card/90 backdrop-blur-md border border-slate-700/50 rounded-xl p-3 shadow-float hover:bg-nova-card transition-colors group"
+                  >
+                    <Maximize2 size={20} className="text-slate-400 group-hover:text-white" />
+                  </button>
+                </CustomTooltip>
+              </div>
+            )}
+            {canToggleFullscreen && isFullscreen && (
+              <div className="absolute bottom-4 right-4 z-10">
+                <CustomTooltip content="Exit fullscreen mode">
+                  <button
+                    onClick={toggleFullscreen}
+                    className="bg-nova-card/90 backdrop-blur-md border border-slate-700/50 rounded-xl p-3 shadow-float hover:bg-nova-card transition-colors group"
+                  >
+                    <Minimize2 size={20} className="text-slate-400 group-hover:text-white" />
+                  </button>
+                </CustomTooltip>
+              </div>
+            )}
+          </div>
         );
       case Page.RESOURCES:
         return <ResourcesView />;
       case Page.NOTES:
         const notes = shapes.filter(s => s.type === ShapeType.NOTE);
         return (
+          <div className="relative h-full">
             <div className="p-8 h-full flex flex-col gap-8 overflow-y-auto">
                  <h2 className="text-3xl font-bold text-white mb-2 flex items-center gap-3"><FileText/> Notes</h2>
                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -499,10 +557,36 @@ const toggleFullscreen = () => {
                      )}
                  </div>
             </div>
+            {canToggleFullscreen && !isFullscreen && (
+              <div className="absolute bottom-4 right-4 z-10">
+                <CustomTooltip content="Enter fullscreen mode">
+                  <button
+                    onClick={toggleFullscreen}
+                    className="bg-nova-card/90 backdrop-blur-md border border-slate-700/50 rounded-xl p-3 shadow-float hover:bg-nova-card transition-colors group"
+                  >
+                    <Maximize2 size={20} className="text-slate-400 group-hover:text-white" />
+                  </button>
+                </CustomTooltip>
+              </div>
+            )}
+            {canToggleFullscreen && isFullscreen && (
+              <div className="absolute bottom-4 right-4 z-10">
+                <CustomTooltip content="Exit fullscreen mode">
+                  <button
+                    onClick={toggleFullscreen}
+                    className="bg-nova-card/90 backdrop-blur-md border border-slate-700/50 rounded-xl p-3 shadow-float hover:bg-nova-card transition-colors group"
+                  >
+                    <Minimize2 size={20} className="text-slate-400 group-hover:text-white" />
+                  </button>
+                </CustomTooltip>
+              </div>
+            )}
+          </div>
         );
       case Page.SHEETS:
         const sheets = shapes.filter(s => s.type === ShapeType.SHEET);
         return (
+          <div className="relative h-full">
             <div className="p-8 h-full flex flex-col gap-8 overflow-y-auto">
                  <h2 className="text-3xl font-bold text-white mb-2 flex items-center gap-3"><Table/> Sheets</h2>
                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -526,6 +610,31 @@ const toggleFullscreen = () => {
                      )}
                  </div>
             </div>
+            {canToggleFullscreen && !isFullscreen && (
+              <div className="absolute bottom-4 right-4 z-10">
+                <CustomTooltip content="Enter fullscreen mode">
+                  <button
+                    onClick={toggleFullscreen}
+                    className="bg-nova-card/90 backdrop-blur-md border border-slate-700/50 rounded-xl p-3 shadow-float hover:bg-nova-card transition-colors group"
+                  >
+                    <Maximize2 size={20} className="text-slate-400 group-hover:text-white" />
+                  </button>
+                </CustomTooltip>
+              </div>
+            )}
+            {canToggleFullscreen && isFullscreen && (
+              <div className="absolute bottom-4 right-4 z-10">
+                <CustomTooltip content="Exit fullscreen mode">
+                  <button
+                    onClick={toggleFullscreen}
+                    className="bg-nova-card/90 backdrop-blur-md border border-slate-700/50 rounded-xl p-3 shadow-float hover:bg-nova-card transition-colors group"
+                  >
+                    <Minimize2 size={20} className="text-slate-400 group-hover:text-white" />
+                  </button>
+                </CustomTooltip>
+              </div>
+            )}
+          </div>
         );
       case Page.SETTINGS:
           return <SettingsView />;
@@ -554,16 +663,16 @@ const toggleFullscreen = () => {
               : 'ml-64'
         }`}
       >
-        {/* Active Board Indicator - Centered on non-board pages */}
+          {/* Active Board Indicator - Centered on non-board pages */}
         {currentBoard && currentPage !== Page.DASHBOARD && (
              <div className={`absolute top-4 z-50 transition-all duration-300 ${
-                 currentPage === Page.NOVA_BOARD 
-                    ? 'left-4' 
+                 currentPage === Page.NOVA_BOARD
+                    ? 'left-4'
                     : 'left-1/2 -translate-x-1/2 shadow-float'
              }`}>
                 {isRenamingBoard ? (
                     <div className="flex items-center gap-2 bg-nova-card p-1 rounded-xl border border-nova-primary">
-                        <input 
+                        <input
                             autoFocus
                             value={tempBoardTitle}
                             onChange={(e) => setTempBoardTitle(e.target.value)}
@@ -584,7 +693,7 @@ const toggleFullscreen = () => {
                         <button onClick={() => handlePageChange(Page.DASHBOARD)} className="hover:text-nova-primary"><ArrowLeft size={14}/></button>
                         <div className="w-px h-3 bg-white/20" />
                         <div className="w-2 h-2 rounded-full bg-nova-primary animate-pulse" />
-                        <span 
+                        <span
                             className="text-sm font-medium cursor-pointer"
                             onClick={() => {
                                 setTempBoardTitle(currentBoard.title);

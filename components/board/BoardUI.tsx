@@ -23,6 +23,7 @@ interface BoardUIProps {
   // Panel Toggles
   toggleFullscreen: () => void;
   isFullscreen: boolean;
+  canToggleFullscreen: boolean;
 
   // Selection Context
   selectedConnection: { from: string, to: string, midPoint?: Point } | null;
@@ -62,6 +63,7 @@ export const BoardUI: React.FC<BoardUIProps> = ({
   triggerImageToolUpload,
   toggleFullscreen,
   isFullscreen,
+  canToggleFullscreen,
   selectedConnection,
   selectedIds,
   shapes,
@@ -77,23 +79,7 @@ export const BoardUI: React.FC<BoardUIProps> = ({
   loadingIds,
   handleAIBrainstorm
 }) => {
-  // Animated fullscreen toggle icon
-  const FullscreenIcon = () => (
-    <div className="relative w-4 h-4 overflow-hidden">
-      <Maximize2
-        size={16}
-        className={`absolute inset-0 transition-all duration-300 ${
-          isFullscreen ? 'transform scale-0 rotate-180 opacity-0' : 'transform scale-100 rotate-0 opacity-100'
-        }`}
-      />
-      <Minimize2
-        size={16}
-        className={`absolute inset-0 transition-all duration-300 ${
-          isFullscreen ? 'transform scale-100 rotate-0 opacity-100' : 'transform scale-0 rotate-180 opacity-0'
-        }`}
-      />
-    </div>
-  );
+
 
   return (
     <>
@@ -153,16 +139,30 @@ export const BoardUI: React.FC<BoardUIProps> = ({
                 )}
              </div>
          </div>
-         <div className="flex items-center gap-1">
-             <CustomTooltip content={`Toggle fullscreen mode`}>
-               <ToolButton
-                 icon={FullscreenIcon}
-                 title="Fullscreen"
-                 isActive={false}
-                 onClick={toggleFullscreen}
-               />
-             </CustomTooltip>
-         </div>
+         {canToggleFullscreen && !isFullscreen && (
+           <div className="flex items-center gap-1">
+               <CustomTooltip content="Enter fullscreen mode">
+                 <ToolButton
+                   icon={Maximize2}
+                   title="Fullscreen"
+                   isActive={false}
+                   onClick={toggleFullscreen}
+                 />
+               </CustomTooltip>
+           </div>
+         )}
+         {canToggleFullscreen && isFullscreen && (
+           <div className="flex items-center gap-1">
+               <CustomTooltip content="Exit fullscreen mode">
+                 <ToolButton
+                   icon={Minimize2}
+                   title="Fullscreen"
+                   isActive={false}
+                   onClick={toggleFullscreen}
+                 />
+               </CustomTooltip>
+           </div>
+         )}
       </div>
       
       {/* Connection Context Menu */}

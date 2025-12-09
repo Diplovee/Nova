@@ -22,6 +22,7 @@ interface NovaBoardProps {
   isRightPanelCollapsed: boolean;
   isFullscreen: boolean;
   toggleFullscreen: () => void;
+  canToggleFullscreen: boolean;
 }
 
 export const NovaBoard: React.FC<NovaBoardProps> = ({
@@ -34,7 +35,8 @@ export const NovaBoard: React.FC<NovaBoardProps> = ({
   onOpenEditor,
   isRightPanelCollapsed,
   isFullscreen,
-  toggleFullscreen
+  toggleFullscreen,
+  canToggleFullscreen
 }) => {
   // --- View State ---
   const [scale, setScale] = useState(1);
@@ -1243,6 +1245,7 @@ export const NovaBoard: React.FC<NovaBoardProps> = ({
         triggerImageToolUpload={() => imageToolInputRef.current?.click()}
         toggleFullscreen={toggleFullscreen}
         isFullscreen={isFullscreen}
+        canToggleFullscreen={canToggleFullscreen}
         selectedConnection={selectedConnection}
         selectedIds={selectedIds}
         shapes={shapes}
