@@ -486,16 +486,18 @@ export const NovaBoard: React.FC<NovaBoardProps> = ({
     const isCircle = type === ShapeType.CIRCLE;
     const isNote = type === ShapeType.NOTE;
     const isRect = type === ShapeType.RECTANGLE;
-    
+    const isIdea = type === ShapeType.IDEA;
+    const isTask = type === ShapeType.TASK;
+
     let x = 0, y = 0;
     if (clientX && clientY) {
         const coords = toCanvasCoordinates(clientX, clientY);
-        x = coords.x - (isText ? 100 : 90);
-        y = coords.y - (isText ? 30 : 50);
+        x = coords.x - (isText ? 100 : isCircle ? 70 : isNote || type === ShapeType.SHEET ? 100 : isRect ? 150 : isIdea ? 160 : 90);
+        y = coords.y - (isText ? 30 : isCircle ? 70 : isNote || type === ShapeType.SHEET ? 120 : isRect ? 150 : isIdea ? 60 : 50);
     } else if (containerRef.current) {
         const rect = containerRef.current.getBoundingClientRect();
-        x = (-pan.x + rect.width / 2) / scale - (isText ? 100 : 90);
-        y = (-pan.y + rect.height / 2) / scale - (isText ? 30 : 50);
+        x = (-pan.x + rect.width / 2) / scale - (isText ? 100 : isCircle ? 70 : isNote || type === ShapeType.SHEET ? 100 : isRect ? 150 : isIdea ? 160 : 90);
+        y = (-pan.y + rect.height / 2) / scale - (isText ? 30 : isCircle ? 70 : isNote || type === ShapeType.SHEET ? 120 : isRect ? 150 : isIdea ? 60 : 50);
     }
 
     const id = generateId();
@@ -504,8 +506,8 @@ export const NovaBoard: React.FC<NovaBoardProps> = ({
       type,
       x,
       y,
-      width: isText ? 200 : isCircle ? 140 : isNote || type === ShapeType.SHEET ? 200 : isRect ? 300 : 200, 
-      height: isText ? 60 : isCircle ? 140 : isNote || type === ShapeType.SHEET ? 240 : isRect ? 300 : 120,
+      width: isText ? 200 : isCircle ? 140 : isNote || type === ShapeType.SHEET ? 200 : isRect ? 300 : isIdea || isTask ? 320 : 200,
+      height: isText ? 60 : isCircle ? 140 : isNote || type === ShapeType.SHEET ? 240 : isRect ? 300 : isIdea || isTask ? 135 : 120,
       text: '', 
       connections: [],
       status: 'TODO',

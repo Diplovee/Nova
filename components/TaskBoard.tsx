@@ -296,8 +296,8 @@ export const TaskBoard: React.FC<TaskBoardProps> = ({ shapes, onUpdateShapes }) 
           type: ShapeType.TASK,
           x: 100, // Default positions for board view compatibility
           y: 100,
-          width: 200,
-          height: 120,
+          width: 320,
+          height: 135,
           text: title,
           status: targetColumnStatus,
           priority: priority,
