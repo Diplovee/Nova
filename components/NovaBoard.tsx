@@ -1072,26 +1072,54 @@ export const NovaBoard: React.FC<NovaBoardProps> = ({
                 };
                 onUpdateShapes([...shapes.filter(s => s.id !== id), updatedParent, newSheet]);
             } else {
-                const suggestions = await generateSubtasks(context, shape.attachments || []);
-                const newShapes: Shape[] = [];
+                // 'nodes' mode - create AI-generated idea nodes with skeleton loading
+                // Pre-create placeholder shapes with skeleton loading
+                const placeholderIds: string[] = [];
+                const placeholders: Shape[] = [];
                 const startY = shape.y + shape.height + 100;
-                suggestions.forEach((text, idx) => {
-                    newShapes.push({
-                        id: generateId(),
+
+                // Create placeholders (we'll assume 3-5 suggestions, but will adjust after AI response)
+                for (let idx = 0; idx < 4; idx++) {
+                    const placeholderId = generateId();
+                    placeholderIds.push(placeholderId);
+                    placeholders.push({
+                        id: placeholderId,
                         type: ShapeType.IDEA,
                         x: shape.x + (idx * 220),
                         y: startY,
                         width: 180,
                         height: 120,
-                        text,
+                        text: '',
                         connections: []
                     });
-                });
-                 const updatedParent = { 
-                    ...shape, 
-                    connections: [...shape.connections, ...newShapes.map(n => ({ targetId: n.id, style: defaultConnectionStyle }))] 
+                }
+
+                // Add placeholder IDs to loading state for skeleton animation
+                const loadingWithPlaceholders = new Set([...loadingIds, ...placeholderIds]);
+                setLoadingIds(loadingWithPlaceholders);
+
+                // Add placeholders to board (showing skeletons)
+                const updatedParentWithPlaceholders = {
+                    ...shape,
+                    connections: [...shape.connections, ...placeholders.map(n => ({ targetId: n.id, style: defaultConnectionStyle }))]
                 };
-                onUpdateShapes([...shapes.filter(s => s.id !== id), updatedParent, ...newShapes]);
+                onUpdateShapes([...shapes.filter(s => s.id !== id), updatedParentWithPlaceholders, ...placeholders]);
+
+                // Now call AI to generate content
+                const suggestions = await generateSubtasks(context, shape.attachments || []);
+
+                // Update placeholders with actual AI-generated content
+                const newShapesWithContent = placeholders.slice(0, suggestions.length).map((placeholder, idx) => ({
+                    ...placeholder,
+                    text: suggestions[idx]
+                }));
+
+                // Update board with content and remove placeholders from loading
+                onUpdateShapes([
+                    ...shapes.filter(s => s.id !== id),
+                    updatedParentWithPlaceholders,
+                    ...newShapesWithContent
+                ]);
             }
          }
     } catch (e) {
